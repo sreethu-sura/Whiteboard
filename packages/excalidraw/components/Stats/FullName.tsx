@@ -5,6 +5,7 @@ import type { AppState } from "../../types";
 import { isPropertyEditable } from "./utils";
 import DragInput from "./DragInput";
 import type { DragInputCallbackType } from "./DragInput";
+import { CustomDataIcon } from "../icons";
 
 interface FullNameProps {
   element: ExcalidrawElement;
@@ -38,7 +39,8 @@ const handleFullNameChange: DragInputCallbackType<FullNameProps["property"]> = (
 const FullName = ({ element, scene, appState, property }: FullNameProps) => {
   return (
     <DragInput
-      label="Full Name"
+      label="Model"
+      icon={CustomDataIcon}
       value={element.full_name || ""}
       elements={[element]}
       dragInputCallback={handleFullNameChange}

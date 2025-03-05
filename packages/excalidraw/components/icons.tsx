@@ -2262,3 +2262,16 @@ export const CuboidIcon = createIcon(
   </g>,
   tablerIconProps,
 );
+
+
+export const CustomDataIcon = createIcon(
+  <g strokeWidth={1.25}>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    <ellipse cx="12" cy="6" rx="6" ry="3" />
+    <path d="M6 6v6c0 1.5 2.7 3 6 3s6 -1.5 6 -3v-6" />
+    <path d="M6 12v6c0 1.5 2.7 3 6 3s6 -1.5 6 -3v-6" />
+    <path d="M9 10h6" />
+    <path d="M9 16h6" />
+  </g>,
+  tablerIconProps,
+);

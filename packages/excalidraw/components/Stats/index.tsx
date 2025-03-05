@@ -14,6 +14,7 @@ import Dimension from "./Dimension";
 import Angle from "./Angle";
 import FontSize from "./FontSize";
 import FullName from "./FullName";
+import CustomData from "./CustomData";
 import MultiDimension from "./MultiDimension";
 import { elementsAreInSameGroup } from "../../groups";
 import MultiAngle from "./MultiAngle";
@@ -331,6 +332,14 @@ export const StatsInner = memo(
                           appState={appState}
                         />
                       </StatsRow>
+                      {/* <StatsRow>
+                      <CustomData
+    property="customData"
+    element={singleElement}
+    scene={scene}
+    appState={appState}
+  />
+</StatsRow> */}
                       {!isElbowArrow(singleElement) && (
                         <StatsRow>
                           <Angle
