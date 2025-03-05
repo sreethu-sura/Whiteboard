@@ -28,7 +28,6 @@ import type { FileSystemHandle } from "./filesystem";
 import { fileSave } from "./filesystem";
 import { serializeAsJSON } from "./json";
 
-export { saveAsCSV } from "./saveAsCSV";
 
 export { loadFromBlob } from "./blob";
 export { loadFromJSON, saveAsJSON } from "./json";

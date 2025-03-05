@@ -3,7 +3,7 @@ import { ProjectName } from "../components/ProjectName";
 import { ToolButton } from "../components/ToolButton";
 import { Tooltip } from "../components/Tooltip";
 import { DarkModeToggle } from "../components/DarkModeToggle";
-import { loadFromJSON, saveAsJSON, saveAsCSV } from "../data";
+import { loadFromJSON, saveAsJSON } from "../data";
 import { resaveAsImageWithScene } from "../data/resave";
 import { t } from "../i18n";
 import { useDevice } from "../components/App";
@@ -19,7 +19,7 @@ import { nativeFileSystemSupported } from "../data/filesystem";
 import type { Theme } from "../element/types";
 import { exportToPdf } from "./exportToPdf";
 import { exportToCsv } from "./exportToCsv";
-
+import { serializeAsJSON } from "../data/json";
 import "../components/ToolIcon.scss";
 import { StoreAction } from "../store";
 
@@ -357,18 +357,22 @@ export const actionSaveToPdf = register({
 export const actionExportToCsv = register({
   name: "exportToCsv",
   label: "Save to CSV",
-  // icon: CsvIcon, // Provide or import your CSV icon if needed
+  icon: CsvIcon, // Ensure you import or provide the CSV icon
   trackEvent: { category: "export" },
-  predicate: (elements, appState, props, app) => {
-    // Only enable CSV export if not in view-only mode
+  predicate: (elements, appState) => {
+    // Enable CSV export only if not in view-only mode
     return !appState.viewModeEnabled;
   },
   perform: async (elements, appState, value, app) => {
     try {
-      // Generate the CSV
-      const csvBlob = await exportToCsv(elements, appState, app.files);
+      // Step 1: Save data as JSON first
+      const jsonData = serializeAsJSON(elements, appState, app.files, "local");
+      const parsedData = JSON.parse(jsonData); // Parse JSON for CSV conversion
 
-      // Trigger file download
+      // Step 2: Generate CSV from JSON
+      const csvBlob = await exportToCsv(parsedData.elements, appState, app.files);
+
+      // Step 3: Trigger file download
       const fileName = `${app.getName()}.csv`;
       const link = document.createElement("a");
       link.href = URL.createObjectURL(csvBlob);
@@ -380,16 +384,13 @@ export const actionExportToCsv = register({
         storeAction: StoreAction.NONE,
         appState: {
           ...appState,
-          toast: {
-            message: `Saved to ${fileName}`,
-          },
+          toast: { message: `Saved to ${fileName}` },
         },
       };
     } catch (error) {
-      console.error("Failed to save as CSV:", error);
+      console.error("Failed to export CSV:", error);
       return { storeAction: StoreAction.NONE };
     }
   },
-  // Optional: add a keyboard shortcut, e.g., CTRL/CMD + SHIFT + C
   keyTest: (event) => event.key === "C" && event.ctrlKey && event.shiftKey,
 });
