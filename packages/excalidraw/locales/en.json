@@ -295,7 +295,8 @@
     "laser": "Laser pointer",
     "hand": "Hand (panning tool)",
     "extraTools": "More tools",
-    "mermaidToExcalidraw": "Mermaid to Excalidraw"
+    "mermaidToExcalidraw": "Mermaid to Excalidraw",
+    "cuboid": "Cuboid"
   },
   "element": {
     "rectangle": "Rectangle",
@@ -311,7 +312,8 @@
     "magicframe": "Wireframe to code",
     "embeddable": "Web Embed",
     "selection": "Selection",
-    "iframe": "IFrame"
+    "iframe": "IFrame",
+    "cuboid": "Cuboid"
   },
   "headings": {
     "canvasActions": "Canvas actions",

@@ -2252,3 +2252,13 @@ export const CsvIcon = createIcon(
   </g>,
   tablerIconProps,
 );
+
+export const CuboidIcon = createIcon(
+  <g strokeWidth={1.25}>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    <path d="M3 7.5l9 -4.5l9 4.5v9l-9 4.5l-9 -4.5v-9" />
+    <path d="M3 7.5l9 4.5l9 -4.5" />
+    <path d="M12 12v9" />
+  </g>,
+  tablerIconProps,
+);

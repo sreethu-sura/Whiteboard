@@ -391,6 +391,7 @@ export const DEFAULT_ELEMENT_PROPS: {
   roughness: ExcalidrawElement["roughness"];
   opacity: ExcalidrawElement["opacity"];
   locked: ExcalidrawElement["locked"];
+  full_name: ExcalidrawElement["full_name"];
 } = {
   strokeColor: COLOR_PALETTE.black,
   backgroundColor: COLOR_PALETTE.transparent,
@@ -400,6 +401,7 @@ export const DEFAULT_ELEMENT_PROPS: {
   roughness: ROUGHNESS.artist,
   opacity: 100,
   locked: false,
+  full_name: "",
 };
 
 export const LIBRARY_SIDEBAR_TAB = "library";
@@ -433,6 +435,7 @@ export const TOOL_TYPE = {
   magicframe: "magicframe",
   embeddable: "embeddable",
   laser: "laser",
+  cuboid: "cuboid",
 } as const;
 
 export const EDITOR_LS_KEYS = {

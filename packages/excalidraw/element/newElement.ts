@@ -96,6 +96,7 @@ const _newElementBase = <T extends ExcalidrawElement>(
     boundElements = null,
     link = null,
     locked = DEFAULT_ELEMENT_PROPS.locked,
+    full_name = "",
     ...rest
   }: ElementConstructorOpts & Omit<Partial<ExcalidrawGenericElement>, "type">,
 ) => {
@@ -149,6 +150,7 @@ const _newElementBase = <T extends ExcalidrawElement>(
     updated: getUpdatedTimestamp(),
     link,
     locked,
+    full_name,
     customData: rest.customData,
   };
   return element;
@@ -157,6 +159,7 @@ const _newElementBase = <T extends ExcalidrawElement>(
 export const newElement = (
   opts: {
     type: ExcalidrawGenericElement["type"];
+    full_name?: string;
   } & ElementConstructorOpts,
 ): NonDeleted<ExcalidrawGenericElement> =>
   _newElementBase<ExcalidrawGenericElement>(opts.type, opts);
@@ -657,6 +660,7 @@ export const duplicateElement = <TElement extends ExcalidrawElement>(
   copy.boundElements = null;
   copy.updated = getUpdatedTimestamp();
   copy.seed = randomInteger();
+  copy.full_name = overrides?.full_name ?? element.full_name ?? "";
   copy.groupIds = getNewGroupIdsForDuplication(
     copy.groupIds,
     editingGroupId,

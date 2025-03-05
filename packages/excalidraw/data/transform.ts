@@ -300,7 +300,8 @@ const bindLinearElementToElement = (
         switch (startType) {
           case "rectangle":
           case "ellipse":
-          case "diamond": {
+          case "diamond":
+          case "cuboid": {
             startBoundElement = newElement({
               x: startX,
               y: startY,
@@ -375,7 +376,8 @@ const bindLinearElementToElement = (
         switch (endType) {
           case "rectangle":
           case "ellipse":
-          case "diamond": {
+          case "diamond":
+          case "cuboid": {
             endBoundElement = newElement({
               x: endX,
               y: endY,
@@ -513,6 +515,7 @@ export const convertToExcalidrawElements = (
 
     switch (element.type) {
       case "rectangle":
+      case "cuboid":
       case "ellipse":
       case "diamond": {
         const width =
@@ -644,6 +647,7 @@ export const convertToExcalidrawElements = (
       case "rectangle":
       case "ellipse":
       case "diamond":
+      case "cuboid":
       case "arrow": {
         if (element.label?.text) {
           let [container, text] = bindTextToContainer(

@@ -77,6 +77,7 @@ type _ExcalidrawElementBase = Readonly<{
   link: string | null;
   locked: boolean;
   customData?: Record<string, any>;
+  full_name?: string;
 }>;
 
 export type ExcalidrawSelectionElement = _ExcalidrawElementBase & {
@@ -94,6 +95,14 @@ export type ExcalidrawDiamondElement = _ExcalidrawElementBase & {
 export type ExcalidrawEllipseElement = _ExcalidrawElementBase & {
   type: "ellipse";
 };
+
+export type ExcalidrawCuboidElement = _ExcalidrawElementBase & {
+  type: "cuboid";
+  // add an extra property for the 3D height (vertical dimension)
+  
+
+};
+
 
 export type ExcalidrawEmbeddableElement = _ExcalidrawElementBase &
   Readonly<{
@@ -179,12 +188,14 @@ export type ExcalidrawGenericElement =
   | ExcalidrawSelectionElement
   | ExcalidrawRectangleElement
   | ExcalidrawDiamondElement
-  | ExcalidrawEllipseElement;
+  | ExcalidrawEllipseElement
+  | ExcalidrawCuboidElement;
 
 export type ExcalidrawFlowchartNodeElement =
   | ExcalidrawRectangleElement
   | ExcalidrawDiamondElement
-  | ExcalidrawEllipseElement;
+  | ExcalidrawEllipseElement
+  | ExcalidrawCuboidElement;
 
 export type ExcalidrawRectanguloidElement =
   | ExcalidrawRectangleElement
@@ -193,7 +204,8 @@ export type ExcalidrawRectanguloidElement =
   | ExcalidrawFreeDrawElement
   | ExcalidrawIframeLikeElement
   | ExcalidrawFrameLikeElement
-  | ExcalidrawEmbeddableElement;
+  | ExcalidrawEmbeddableElement
+  | ExcalidrawCuboidElement;
 
 /**
  * ExcalidrawElement should be JSON serializable and (eventually) contain
@@ -210,12 +222,14 @@ export type ExcalidrawElement =
   | ExcalidrawFrameElement
   | ExcalidrawMagicFrameElement
   | ExcalidrawIframeElement
-  | ExcalidrawEmbeddableElement;
+  | ExcalidrawEmbeddableElement
+  | ExcalidrawCuboidElement;
 
 export type ExcalidrawNonSelectionElement = Exclude<
   ExcalidrawElement,
   ExcalidrawSelectionElement
 >;
+
 
 export type Ordered<TElement extends ExcalidrawElement> = TElement & {
   index: FractionalIndex;
@@ -262,13 +276,15 @@ export type ExcalidrawBindableElement =
   | ExcalidrawIframeElement
   | ExcalidrawEmbeddableElement
   | ExcalidrawFrameElement
-  | ExcalidrawMagicFrameElement;
+  | ExcalidrawMagicFrameElement
+  | ExcalidrawCuboidElement;
 
 export type ExcalidrawTextContainer =
   | ExcalidrawRectangleElement
   | ExcalidrawDiamondElement
   | ExcalidrawEllipseElement
-  | ExcalidrawArrowElement;
+  | ExcalidrawArrowElement
+  | ExcalidrawCuboidElement;
 
 export type ExcalidrawTextElementWithContainer = {
   containerId: ExcalidrawTextContainer["id"];

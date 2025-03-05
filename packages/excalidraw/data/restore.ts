@@ -86,6 +86,7 @@ export const AllowedExcalidrawActiveTools: Record<
   hand: true,
   laser: false,
   magicframe: false,
+  cuboid: true,
 };
 
 export type RestoredDataState = {
@@ -138,8 +139,9 @@ const repairBinding = <T extends ExcalidrawLinearElement>(
 };
 
 const restoreElementWithProperties = <
-  T extends Required<Omit<ExcalidrawElement, "customData">> & {
+  T extends Required<Omit<ExcalidrawElement, "customData" | "full_name">> & {
     customData?: ExcalidrawElement["customData"];
+    full_name?: ExcalidrawElement["full_name"];
     /** @deprecated */
     boundElementIds?: readonly ExcalidrawElement["id"][];
     /** @deprecated */
@@ -199,6 +201,7 @@ const restoreElementWithProperties = <
     updated: element.updated ?? getUpdatedTimestamp(),
     link: element.link ? normalizeLink(element.link) : null,
     locked: element.locked ?? false,
+    full_name: element.full_name ?? undefined,
   };
 
   if ("customData" in element || "customData" in extra) {
@@ -389,6 +392,7 @@ const restoreElement = (
     // generic elements
     case "ellipse":
     case "rectangle":
+    case "cuboid":
     case "diamond":
     case "iframe":
     case "embeddable":

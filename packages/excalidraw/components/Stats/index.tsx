@@ -13,6 +13,7 @@ import { throttle } from "lodash";
 import Dimension from "./Dimension";
 import Angle from "./Angle";
 import FontSize from "./FontSize";
+import FullName from "./FullName";
 import MultiDimension from "./MultiDimension";
 import { elementsAreInSameGroup } from "../../groups";
 import MultiAngle from "./MultiAngle";
@@ -307,6 +308,14 @@ export const StatsInner = memo(
                         />
                       </StatsRow>
                       <StatsRow>
+                      <FullName
+                        property="full_name"
+                        element={singleElement}
+                        scene={scene}
+                        appState={appState}
+                      />
+                    </StatsRow>
+                      <StatsRow>
                         <Dimension
                           property="width"
                           element={singleElement}
@@ -340,6 +349,7 @@ export const StatsInner = memo(
                           appState={appState}
                         />
                       </StatsRow>
+                      
                     </>
                   )}
 

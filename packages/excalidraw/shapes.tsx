@@ -28,6 +28,7 @@ import {
   RectangleIcon,
   SelectionIcon,
   TextIcon,
+  CuboidIcon,
 } from "./components/icons";
 import {
   DEFAULT_ADAPTIVE_RADIUS,
@@ -122,6 +123,14 @@ export const SHAPES = [
     numericKey: KEYS["0"],
     fillable: false,
   },
+  {
+    value: "cuboid",
+    icon: CuboidIcon, // You’ll need to create this icon component
+    shortcut: "}", // Choose a unique shortcut key
+    key: KEYS.C,
+    numericKey: KEYS["0"],
+    fillable: true, // Whether the shape can be filled with color
+  },
 ] as const;
 
 export const findShapeByKey = (key: string) => {
@@ -178,6 +187,9 @@ export const getElementShape = <Point extends GlobalPoint | LocalPoint>(
             pointFrom(cx, cy),
           );
     }
+
+    case "cuboid":
+      return getPolygonShape(element);
 
     case "ellipse":
       return getEllipseShape(element);

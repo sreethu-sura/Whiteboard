@@ -264,6 +264,7 @@ const renderBindingHighlightForBindableElement = (
 
   switch (element.type) {
     case "rectangle":
+    case "cuboid":
     case "text":
     case "image":
     case "iframe":

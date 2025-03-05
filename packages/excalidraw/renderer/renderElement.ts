@@ -389,15 +389,18 @@ const drawElementOnCanvas = (
 ) => {
   switch (element.type) {
     case "rectangle":
+    case "cuboid":
     case "iframe":
     case "embeddable":
     case "diamond":
-    case "ellipse": {
+    case "ellipse":
+    case "cuboid": {
       context.lineJoin = "round";
       context.lineCap = "round";
       rc.draw(ShapeCache.get(element)!);
       break;
     }
+  
     case "arrow":
     case "line": {
       context.lineJoin = "round";
@@ -797,6 +800,7 @@ export const renderElement = (
       break;
     }
     case "rectangle":
+    case "cuboid":
     case "diamond":
     case "ellipse":
     case "line":

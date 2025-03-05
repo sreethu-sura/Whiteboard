@@ -32,7 +32,8 @@ export type StatsInputProperty =
   | "height"
   | "angle"
   | "fontSize"
-  | "gridStep";
+  | "gridStep"
+  | "full_name";
 
 export const SMALLEST_DELTA = 0.01;
 

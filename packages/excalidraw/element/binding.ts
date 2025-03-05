@@ -26,6 +26,7 @@ import type {
   FixedPoint,
   SceneElementsMap,
   ExcalidrawRectanguloidElement,
+  ExcalidrawCuboidElement,
 } from "./types";
 
 import type { Bounds } from "./bounds";
@@ -1531,6 +1532,7 @@ export const distanceToBindableElement = (
 ): number => {
   switch (element.type) {
     case "rectangle":
+    case "cuboid":
     case "image":
     case "text":
     case "iframe":
@@ -1717,6 +1719,7 @@ const determineFocusDistance = (
   let ret;
   switch (element.type) {
     case "rectangle":
+    case "cuboid":
     case "image":
     case "text":
     case "iframe":
@@ -1764,6 +1767,7 @@ const determineFocusPoint = (
     case "embeddable":
     case "frame":
     case "magicframe":
+    case "cuboid":
       point = findFocusPointForRectangulars(element, focus, adjecentPointRel);
       break;
     case "ellipse":
@@ -1824,6 +1828,7 @@ const getSortedElementLineIntersections = (
   let intersections: GA.Point[];
   switch (element.type) {
     case "rectangle":
+    case "cuboid":
     case "image":
     case "text":
     case "diamond":
@@ -1866,13 +1871,15 @@ const getCorners = (
     | ExcalidrawDiamondElement
     | ExcalidrawTextElement
     | ExcalidrawIframeLikeElement
-    | ExcalidrawFrameLikeElement,
+    | ExcalidrawFrameLikeElement
+    | ExcalidrawCuboidElement,
   scale: number = 1,
 ): GA.Point[] => {
   const hx = (scale * element.width) / 2;
   const hy = (scale * element.height) / 2;
   switch (element.type) {
     case "rectangle":
+    case "cuboid":
     case "image":
     case "text":
     case "iframe":
@@ -2028,11 +2035,13 @@ const findFocusPointForRectangulars = (
     | ExcalidrawDiamondElement
     | ExcalidrawTextElement
     | ExcalidrawIframeLikeElement
-    | ExcalidrawFrameLikeElement,
+    | ExcalidrawFrameLikeElement
+    | ExcalidrawCuboidElement,
   // Between -1 and 1 for how far away should the focus point be relative
   // to the size of the element. Sign determines orientation.
   relativeDistance: number,
   // The point for which we're trying to find the focus point, relative
+  // to the element center.
   // to the element center.
   point: GA.Point,
 ): GA.Point => {

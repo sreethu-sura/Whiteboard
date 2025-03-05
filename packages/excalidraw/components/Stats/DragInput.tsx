@@ -38,7 +38,7 @@ interface StatsDragInputProps<
 > {
   label: string | React.ReactNode;
   icon?: React.ReactNode;
-  value: number | "Mixed";
+  value: number | "Mixed" | string;
   elements: readonly E[];
   editable?: boolean;
   shouldKeepAspectRatio?: boolean;
