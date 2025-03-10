@@ -17,6 +17,7 @@ import FullName from "./FullName";
 import CustomData from "./CustomData";
 import MultiDimension from "./MultiDimension";
 import { elementsAreInSameGroup } from "../../groups";
+import MultiFullName from "./MultiFullName";
 import MultiAngle from "./MultiAngle";
 import MultiFontSize from "./MultiFontSize";
 import Position from "./Position";
@@ -420,6 +421,15 @@ export const StatsInner = memo(
                           scene={scene}
                           appState={appState}
                         />
+                      </StatsRow>
+                      <StatsRow>
+                      <MultiFullName
+    property="full_name"
+    elements={multipleElements}
+    scene={scene}
+    appState={appState}
+  />
+
                       </StatsRow>
                       <StatsRow>
                         <MultiFontSize
