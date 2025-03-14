@@ -8,6 +8,7 @@ import type {
   NonDeletedExcalidrawElement,
   ExcalidrawSelectionElement,
   ExcalidrawLinearElement,
+  ExcalidrawCuboidElement,
   Arrowhead,
 } from "../element/types";
 import { generateFreeDrawShape } from "../renderer/renderElement";
@@ -64,8 +65,8 @@ export const generateRoughOptions = (
       element.strokeStyle === "dashed"
         ? getDashArrayDashed(element.strokeWidth)
         : element.strokeStyle === "dotted"
-        ? getDashArrayDotted(element.strokeWidth)
-        : undefined,
+          ? getDashArrayDotted(element.strokeWidth)
+          : undefined,
     // for non-solid strokes, disable multiStroke because it tends to make
     // dashes/dots overlay each other
     disableMultiStroke: element.strokeStyle !== "solid",
@@ -288,9 +289,9 @@ const getArrowheadShapes = (
         generator.line(x4, y4, x2, y2, options),
         ...(arrowhead === "crowfoot_one_or_many"
           ? generateCrowfootOne(
-              getArrowheadPoints(element, shape, position, "crowfoot_one"),
-              options,
-            )
+            getArrowheadPoints(element, shape, position, "crowfoot_one"),
+            options,
+          )
           : []),
       ];
     }
@@ -319,7 +320,6 @@ export const _generateElementShape = (
 ): Drawable | Drawable[] | null => {
   switch (element.type) {
     case "rectangle":
-    case "cuboid":
     case "iframe":
     case "embeddable": {
       let shape: ElementShapes[typeof element.type];
@@ -331,10 +331,8 @@ export const _generateElementShape = (
         const h = element.height;
         const r = getCornerRadius(Math.min(w, h), element);
         shape = generator.path(
-          `M ${r} 0 L ${w - r} 0 Q ${w} 0, ${w} ${r} L ${w} ${
-            h - r
-          } Q ${w} ${h}, ${w - r} ${h} L ${r} ${h} Q 0 ${h}, 0 ${
-            h - r
+          `M ${r} 0 L ${w - r} 0 Q ${w} 0, ${w} ${r} L ${w} ${h - r
+          } Q ${w} ${h}, ${w - r} ${h} L ${r} ${h} Q 0 ${h}, 0 ${h - r
           } L 0 ${r} Q 0 0, ${r} 0`,
           generateRoughOptions(
             modifyIframeLikeForRoughOptions(
@@ -363,6 +361,84 @@ export const _generateElementShape = (
       }
       return shape;
     }
+    case "cuboid": {
+      let shape: ElementShapes[typeof element.type];
+
+      // Update the cuboid's view-specific properties if needed
+      if (element.type === "cuboid" && "currentView" in element) {
+        element = updateCuboidViewProperties(element as ExcalidrawCuboidElement) as typeof element;
+      }
+
+      // Check if we should use view-specific properties
+      if ("currentView" in element) {
+        // Get the appropriate view properties based on the current view
+        let width = element.width;
+        let height = element.height;
+        let y = 0;
+
+        const currentView = element.currentView;
+        if (currentView === "top" && element.topView && typeof element.topView === "object") {
+          // Use top view properties if available
+          const topView = element.topView;
+          // Use nullish coalescing to handle undefined properties
+          width = topView.width ?? element.width;
+          height = topView.height ?? element.height;
+        } else if (currentView === "elevation" && element.elevationView && typeof element.elevationView === "object") {
+          // Use elevation view properties if available
+          const elevationView = element.elevationView;
+          // Use nullish coalescing to handle undefined properties
+          width = elevationView.width ?? element.width;
+          height = elevationView.height ?? 350; // Initialize height to 350 pixels in elevation view
+          y = element.height - height;
+        } else if (currentView === "elevation") {
+          // If elevation view is not yet defined, initialize with default values
+          height = 350; // Default height for elevation view
+          y = element.height - height;
+        }
+
+        // Generate the shape with the view-specific properties
+        if (element.roundness) {
+          const r = getCornerRadius(Math.min(width, height), element);
+          shape = generator.path(
+            `M ${r} ${y} L ${width - r} ${y} Q ${width} ${y}, ${width} ${y + r} L ${width} ${y + height - r
+            } Q ${width} ${y + height}, ${width - r} ${y + height} L ${r} ${y + height} Q 0 ${y + height}, 0 ${y + height - r
+            } L 0 ${y + r} Q 0 ${y}, ${r} ${y}`,
+            generateRoughOptions(element, true),
+          );
+        } else {
+          shape = generator.rectangle(
+            0,
+            y,
+            width,
+            height,
+            generateRoughOptions(element, false),
+          );
+        }
+      } else {
+        // Fallback to standard rendering if no view is specified
+        if (element.roundness) {
+          const w = element.width;
+          const h = element.height;
+          const r = getCornerRadius(Math.min(w, h), element);
+          shape = generator.path(
+            `M ${r} 0 L ${w - r} 0 Q ${w} 0, ${w} ${r} L ${w} ${h - r
+            } Q ${w} ${h}, ${w - r} ${h} L ${r} ${h} Q 0 ${h}, 0 ${h - r
+            } L 0 ${r} Q 0 0, ${r} 0`,
+            generateRoughOptions(element, true),
+          );
+        } else {
+          shape = generator.rectangle(
+            0,
+            0,
+            element.width,
+            element.height,
+            generateRoughOptions(element, false),
+          );
+        }
+      }
+
+      return shape;
+    }
     case "diamond": {
       let shape: ElementShapes[typeof element.type];
 
@@ -377,23 +453,18 @@ export const _generateElementShape = (
         );
 
         shape = generator.path(
-          `M ${topX + verticalRadius} ${topY + horizontalRadius} L ${
-            rightX - verticalRadius
+          `M ${topX + verticalRadius} ${topY + horizontalRadius} L ${rightX - verticalRadius
           } ${rightY - horizontalRadius}
-            C ${rightX} ${rightY}, ${rightX} ${rightY}, ${
-            rightX - verticalRadius
+            C ${rightX} ${rightY}, ${rightX} ${rightY}, ${rightX - verticalRadius
           } ${rightY + horizontalRadius}
             L ${bottomX + verticalRadius} ${bottomY - horizontalRadius}
-            C ${bottomX} ${bottomY}, ${bottomX} ${bottomY}, ${
-            bottomX - verticalRadius
+            C ${bottomX} ${bottomY}, ${bottomX} ${bottomY}, ${bottomX - verticalRadius
           } ${bottomY - horizontalRadius}
             L ${leftX + verticalRadius} ${leftY + horizontalRadius}
-            C ${leftX} ${leftY}, ${leftX} ${leftY}, ${leftX + verticalRadius} ${
-            leftY - horizontalRadius
+            C ${leftX} ${leftY}, ${leftX} ${leftY}, ${leftX + verticalRadius} ${leftY - horizontalRadius
           }
             L ${topX - verticalRadius} ${topY + horizontalRadius}
-            C ${topX} ${topY}, ${topX} ${topY}, ${topX + verticalRadius} ${
-            topY + horizontalRadius
+            C ${topX} ${topY}, ${topX} ${topY}, ${topX + verticalRadius} ${topY + horizontalRadius
           }`,
           generateRoughOptions(element, true),
         );
@@ -525,6 +596,76 @@ export const _generateElementShape = (
   }
 };
 
+// Add this helper function to update cuboid view properties
+export const updateCuboidViewProperties = (
+  element: ExcalidrawCuboidElement,
+): ExcalidrawCuboidElement => {
+  if (!element.currentView) {
+    return element;
+  }
+
+  // Create a mutable copy of the element
+  const updatedElement = { ...element };
+
+  // Default heights for each view
+  const DEFAULT_TOP_VIEW_HEIGHT = 250;
+  const DEFAULT_ELEVATION_VIEW_HEIGHT = 350;
+
+  if (element.currentView === "top") {
+    // If switching from elevation to top view or initializing top view
+    const oldHeight = element.height;
+    let newHeight;
+
+    // Keep the same width but use top view height
+    if (!element.topView) {
+      // If no top view exists yet, use default height
+      newHeight = DEFAULT_TOP_VIEW_HEIGHT;
+    } else {
+      // Use previously saved top view height
+      newHeight = element.topView.height;
+    }
+
+    // Adjust y-coordinate to maintain the same bottom edge
+    updatedElement.y = element.y + (oldHeight - newHeight);
+    updatedElement.height = newHeight;
+
+    // Store current dimensions in topView
+    updatedElement.topView = {
+      x: updatedElement.x,
+      y: updatedElement.y,
+      width: element.width,
+      height: updatedElement.height,
+    };
+  } else if (element.currentView === "elevation") {
+    // If switching from top to elevation view or initializing elevation view
+    const oldHeight = element.height;
+    let newHeight;
+
+    // Keep the same width but use elevation view height
+    if (!element.elevationView) {
+      // If no elevation view exists yet, use default height
+      newHeight = DEFAULT_ELEVATION_VIEW_HEIGHT;
+    } else {
+      // Use previously saved elevation view height
+      newHeight = element.elevationView.height;
+    }
+
+    // Adjust y-coordinate to maintain the same bottom edge
+    updatedElement.y = element.y + (oldHeight - newHeight);
+    updatedElement.height = newHeight;
+
+    // Store current dimensions in elevationView
+    updatedElement.elevationView = {
+      x: updatedElement.x,
+      y: updatedElement.y,
+      width: element.width,
+      height: updatedElement.height,
+    };
+  }
+
+  return updatedElement;
+};
+
 const generateElbowArrowShape = (
   points: readonly LocalPoint[],
   radius: number,
@@ -580,8 +721,7 @@ const generateElbowArrowShape = (
   for (let i = 0; i < subpoints.length; i += 3) {
     d.push(`L ${subpoints[i][0]} ${subpoints[i][1]}`);
     d.push(
-      `Q ${subpoints[i + 1][0]} ${subpoints[i + 1][1]}, ${
-        subpoints[i + 2][0]
+      `Q ${subpoints[i + 1][0]} ${subpoints[i + 1][1]}, ${subpoints[i + 2][0]
       } ${subpoints[i + 2][1]}`,
     );
   }

@@ -11,6 +11,7 @@ import type {
   ElementsMap,
   SceneElementsMap,
   ExcalidrawElbowArrowElement,
+  ExcalidrawCuboidElement,
 } from "./types";
 import type { Mutable } from "../utility-types";
 import {
@@ -32,6 +33,7 @@ import {
   isTextElement,
 } from "./typeChecks";
 import { mutateElement } from "./mutateElement";
+import type { ElementUpdate } from "./mutateElement";
 import { getFontString } from "../utils";
 import { getArrowLocalFixedPoints, updateBoundElements } from "./binding";
 import type {
@@ -94,7 +96,7 @@ export const transformElements = (
           pointerY,
           shouldRotateWithDiscreteAngle,
         );
-        updateBoundElements(element, elementsMap);
+        updateBoundElements(element, elementsMap as SceneElementsMap);
       }
     } else if (isTextElement(element) && transformHandleType) {
       resizeSingleTextElement(
@@ -106,7 +108,7 @@ export const transformElements = (
         pointerX,
         pointerY,
       );
-      updateBoundElements(element, elementsMap);
+      updateBoundElements(element, elementsMap as SceneElementsMap);
       return true;
     } else if (transformHandleType) {
       const elementId = selectedElements[0].id;
@@ -199,7 +201,7 @@ export const transformElements = (
 
 const rotateSingleElement = (
   element: NonDeletedExcalidrawElement,
-  elementsMap: ElementsMap,
+  elementsMap: SceneElementsMap,
   scene: Scene,
   pointerX: number,
   pointerY: number,
@@ -241,13 +243,13 @@ export const rescalePointsInElement = (
 ) =>
   isLinearElement(element) || isFreeDrawElement(element)
     ? {
-        points: rescalePoints(
-          0,
-          width,
-          rescalePoints(1, height, element.points, normalizePoints),
-          normalizePoints,
-        ),
-      }
+      points: rescalePoints(
+        0,
+        width,
+        rescalePoints(1, height, element.points, normalizePoints),
+        normalizePoints,
+      ),
+    }
     : {};
 
 export const measureFontSizeFromWidth = (
@@ -549,7 +551,7 @@ const rotateMultipleElements = (
         );
       }
 
-      updateBoundElements(element, elementsMap, {
+      updateBoundElements(element, elementsMap as SceneElementsMap, {
         simultaneouslyUpdated: elements,
       });
 
@@ -774,8 +776,8 @@ const getResizedOrigin = (
       if (
         Math.abs(
           y +
-            ((prevWidth - newWidth) / 2) * Math.sin(angle) +
-            (prevHeight - newHeight) / 2,
+          ((prevWidth - newWidth) / 2) * Math.sin(angle) +
+          (prevHeight - newHeight) / 2,
         ) > 1e6
       ) {
         console.error(
@@ -963,12 +965,33 @@ export const resizeSingleElement = (
     boundTextFont.fontSize = fontSize;
   }
 
-  if (
-    nextWidth !== 0 &&
-    nextHeight !== 0 &&
-    Number.isFinite(newOrigin.x) &&
-    Number.isFinite(newOrigin.y)
-  ) {
+  if (latestElement.type === "cuboid" && "currentView" in latestElement) {
+    const currentView = latestElement.currentView;
+    const updates: ElementUpdate<ExcalidrawCuboidElement> = {
+      ...newOrigin,
+      width: Math.abs(nextWidth),
+      height: Math.abs(nextHeight),
+      ...rescaledPoints,
+    };
+
+    if (currentView === "top") {
+      updates.topView = {
+        x: newOrigin.x,
+        y: newOrigin.y,
+        width: Math.abs(nextWidth),
+        height: Math.abs(nextHeight),
+      };
+    } else if (currentView === "elevation") {
+      updates.elevationView = {
+        x: newOrigin.x,
+        y: newOrigin.y,
+        width: Math.abs(nextWidth),
+        height: Math.abs(nextHeight),
+      };
+    }
+
+    mutateElement(latestElement as ExcalidrawCuboidElement, updates, shouldInformMutation);
+  } else {
     const updates = {
       ...newOrigin,
       width: Math.abs(nextWidth),
@@ -977,24 +1000,28 @@ export const resizeSingleElement = (
     };
 
     mutateElement(latestElement, updates, shouldInformMutation);
+  }
 
-    updateBoundElements(latestElement, elementsMap as SceneElementsMap, {
-      // TODO: confirm with MARK if this actually makes sense
-      newSize: { width: nextWidth, height: nextHeight },
-    });
+  updateBoundElements(latestElement, elementsMap as SceneElementsMap, {
+    // TODO: confirm with MARK if this actually makes sense
+    newSize: { width: nextWidth, height: nextHeight },
+  });
 
-    if (boundTextElement && boundTextFont != null) {
-      mutateElement(boundTextElement, {
+  if (boundTextElement && boundTextFont != null) {
+    mutateElement(
+      boundTextElement,
+      {
         fontSize: boundTextFont.fontSize,
-      });
-    }
-    handleBindTextResize(
-      latestElement,
-      elementsMap,
-      handleDirection,
-      shouldMaintainAspectRatio,
+      },
+      shouldInformMutation,
     );
   }
+  handleBindTextResize(
+    latestElement,
+    elementsMap,
+    handleDirection,
+    shouldMaintainAspectRatio,
+  );
 };
 
 const getNextSingleWidthAndHeightFromPointer = (

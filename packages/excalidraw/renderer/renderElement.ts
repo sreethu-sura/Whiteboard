@@ -7,6 +7,7 @@ import type {
   ExcalidrawTextElementWithContainer,
   ExcalidrawFrameLikeElement,
   NonDeletedSceneElementsMap,
+  ExcalidrawCuboidElement,
   ElementsMap,
 } from "../element/types";
 import {
@@ -59,6 +60,10 @@ import { LinearElementEditor } from "../element/linearElementEditor";
 
 import { getContainingFrame } from "../frame";
 import { ShapeCache } from "../scene/ShapeCache";
+import {
+  _generateElementShape,
+  updateCuboidViewProperties,
+} from "../scene/Shape";
 import { getVerticalOffset } from "../fonts";
 import { isRightAngleRads } from "../../math";
 import { getCornerRadius } from "../shapes";
@@ -311,17 +316,17 @@ const generateElementCanvas = (
     // Clear the bound text area
     boundTextCanvasContext.clearRect(
       -(boundTextElement.width / 2 + BOUND_TEXT_PADDING) *
-        window.devicePixelRatio *
-        scale,
+      window.devicePixelRatio *
+      scale,
       -(boundTextElement.height / 2 + BOUND_TEXT_PADDING) *
-        window.devicePixelRatio *
-        scale,
+      window.devicePixelRatio *
+      scale,
       (boundTextElement.width + BOUND_TEXT_PADDING * 2) *
-        window.devicePixelRatio *
-        scale,
+      window.devicePixelRatio *
+      scale,
       (boundTextElement.height + BOUND_TEXT_PADDING * 2) *
-        window.devicePixelRatio *
-        scale,
+      window.devicePixelRatio *
+      scale,
     );
   }
 
@@ -400,7 +405,7 @@ const drawElementOnCanvas = (
       rc.draw(ShapeCache.get(element)!);
       break;
     }
-  
+
     case "arrow":
     case "line": {
       context.lineJoin = "round";
@@ -449,11 +454,11 @@ const drawElementOnCanvas = (
         const { x, y, width, height } = element.crop
           ? element.crop
           : {
-              x: 0,
-              y: 0,
-              width: img.naturalWidth,
-              height: img.naturalHeight,
-            };
+            x: 0,
+            y: 0,
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+          };
 
         context.drawImage(
           img,
@@ -493,8 +498,8 @@ const drawElementOnCanvas = (
           element.textAlign === "center"
             ? element.width / 2
             : element.textAlign === "right"
-            ? element.width
-            : 0;
+              ? element.width
+              : 0;
 
         const lineHeightPx = getLineHeightInPx(
           element.fontSize,
@@ -642,16 +647,16 @@ const drawElementFromCanvas = (
     context.drawImage(
       elementWithCanvas.canvas!,
       (x1 + appState.scrollX) * window.devicePixelRatio -
-        (padding * elementWithCanvas.scale) / elementWithCanvas.scale,
+      (padding * elementWithCanvas.scale) / elementWithCanvas.scale,
       (y1 + appState.scrollY) * window.devicePixelRatio -
-        (padding * elementWithCanvas.scale) / elementWithCanvas.scale,
+      (padding * elementWithCanvas.scale) / elementWithCanvas.scale,
       elementWithCanvas.canvas!.width / elementWithCanvas.scale,
       elementWithCanvas.canvas!.height / elementWithCanvas.scale,
     );
 
     if (
       import.meta.env.VITE_APP_DEBUG_ENABLE_TEXT_CONTAINER_BOUNDING_BOX ===
-        "true" &&
+      "true" &&
       hasBoundTextElement(element)
     ) {
       const textElement = getBoundTextElement(
@@ -800,7 +805,6 @@ export const renderElement = (
       break;
     }
     case "rectangle":
-    case "cuboid":
     case "diamond":
     case "ellipse":
     case "line":
@@ -918,8 +922,6 @@ export const renderElement = (
         }
 
         context.restore();
-        // not exporting → optimized rendering (cache & render from element
-        // canvases)
       } else {
         const elementWithCanvas = generateElementWithCanvas(
           element,
@@ -932,56 +934,64 @@ export const renderElement = (
           return;
         }
 
-        const currentImageSmoothingStatus = context.imageSmoothingEnabled;
+        drawElementFromCanvas(
+          elementWithCanvas,
+          context,
+          renderConfig,
+          appState,
+          allElementsMap,
+        );
+      }
+      break;
+    }
+    case "cuboid": {
+      // Handle cuboid elements differently based on the current view
+      if ("currentView" in appState) {
+        // Force regenerate the shape for cuboid when the view changes
+        if (element.currentView !== appState.currentView) {
+          // Update the element's currentView to match appState
+          const currentView = appState.currentView;
+          if (currentView === "top" || currentView === "elevation") {
+            element = {
+              ...element,
+              currentView: currentView,
+            };
 
-        if (
-          // do not disable smoothing during zoom as blurry shapes look better
-          // on low resolution (while still zooming in) than sharp ones
-          !appState?.shouldCacheIgnoreZoom &&
-          // angle is 0 -> always disable smoothing
-          (!element.angle ||
-            // or check if angle is a right angle in which case we can still
-            // disable smoothing without adversely affecting the result
-            // We need less-than comparison because of FP artihmetic
-            isRightAngleRads(element.angle))
-        ) {
-          // Disabling smoothing makes output much sharper, especially for
-          // text. Unless for non-right angles, where the aliasing is really
-          // terrible on Chromium.
-          //
-          // Note that `context.imageSmoothingQuality="high"` has almost
-          // zero effect.
-          //
-          context.imageSmoothingEnabled = false;
-        }
+            // Update view-specific properties
+            element = updateCuboidViewProperties(element as ExcalidrawCuboidElement);
 
-        if (
-          element.id === appState.croppingElementId &&
-          isImageElement(elementWithCanvas.element) &&
-          elementWithCanvas.element.crop !== null
-        ) {
-          context.save();
-          context.globalAlpha = 0.1;
-
-          const uncroppedElementCanvas = generateElementCanvas(
-            getUncroppedImageElement(elementWithCanvas.element, elementsMap),
-            allElementsMap,
-            appState.zoom,
-            renderConfig,
-            appState,
-          );
-
-          if (uncroppedElementCanvas) {
-            drawElementFromCanvas(
-              uncroppedElementCanvas,
-              context,
-              renderConfig,
-              appState,
-              allElementsMap,
-            );
+            // Clear the shape cache to force regeneration
+            ShapeCache.delete(element);
           }
+        }
+      }
 
-          context.restore();
+      // Generate the shape based on the current view
+      ShapeCache.generateElementShape(element, renderConfig);
+
+      if (renderConfig.isExporting) {
+        const [x1, y1, x2, y2] = getElementAbsoluteCoords(element, elementsMap);
+        const cx = (x1 + x2) / 2 + appState.scrollX;
+        const cy = (y1 + y2) / 2 + appState.scrollY;
+        const shiftX = (x2 - x1) / 2 - (element.x - x1);
+        const shiftY = (y2 - y1) / 2 - (element.y - y1);
+
+        context.save();
+        context.translate(cx, cy);
+        context.rotate(element.angle);
+        context.translate(-shiftX, -shiftY);
+        drawElementOnCanvas(element, rc, context, renderConfig, appState);
+        context.restore();
+      } else {
+        const elementWithCanvas = generateElementWithCanvas(
+          element,
+          allElementsMap,
+          renderConfig,
+          appState,
+        );
+
+        if (!elementWithCanvas) {
+          return;
         }
 
         drawElementFromCanvas(
@@ -991,9 +1001,6 @@ export const renderElement = (
           appState,
           allElementsMap,
         );
-
-        // reset
-        context.imageSmoothingEnabled = currentImageSmoothingStatus;
       }
       break;
     }
@@ -1024,8 +1031,8 @@ export function getFreeDrawSvgPath(element: ExcalidrawFreeDrawElement) {
   const inputPoints = element.simulatePressure
     ? element.points
     : element.points.length
-    ? element.points.map(([x, y], i) => [x, y, element.pressures[i]])
-    : [[0, 0, 0.5]];
+      ? element.points.map(([x, y], i) => [x, y, element.pressures[i]])
+      : [[0, 0, 0.5]];
 
   // Consider changing the options for simulated pressure vs real pressure
   const options: StrokeOptions = {

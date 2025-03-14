@@ -3,7 +3,8 @@ import { register } from "./register";
 import type { AppState, UIAppState } from "../types";
 import { StoreAction } from "../store";
 import { TopViewIcon, ElevationViewIcon } from "../components/icons";
-import type { ExcalidrawElement } from "../element/types";
+import type { ExcalidrawElement, ExcalidrawCuboidElement } from "../element/types";
+import { updateCuboidViewProperties } from "../scene/Shape";
 
 export const actionToggleView = register({
   name: "toggleView",
@@ -18,10 +19,29 @@ export const actionToggleView = register({
   predicate: (elements, appState) => true,
   checked: (appState) => appState.currentView === "elevation",
   perform: (elements, appState) => {
+    // Get the new view with proper type annotation
+    const newView: "top" | "elevation" = appState.currentView === "top" ? "elevation" : "top";
+    
+    // Update all cuboid elements with the new view
+    const updatedElements = elements.map(element => {
+      if (element.type === "cuboid") {
+        // First update the currentView property
+        const updatedElement = {
+          ...element,
+          currentView: newView,
+        } as ExcalidrawCuboidElement;
+        
+        // Then apply the view-specific properties (height, etc.)
+        return updateCuboidViewProperties(updatedElement);
+      }
+      return element;
+    });
+    
     return {
+      elements: updatedElements,
       appState: {
         ...appState,
-        currentView: appState.currentView === "top" ? "elevation" : "top",
+        currentView: newView,
       },
       storeAction: StoreAction.NONE,
     };
