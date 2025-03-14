@@ -1,18 +1,18 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Meta",
+  "productName": "AutoSketch",
   "version": "0.1.0",
-  "identifier": "com.meta.tauri.dev",
+  "identifier": "com.autosketch.dev",
   "build": {
     "frontendDist": "../excalidraw-app/build",
     "devUrl": "http://localhost:3000",
-    "beforeDevCommand": "yarn dev",
+    "beforeDevCommand": "yarn start",
     "beforeBuildCommand": "yarn build"
   },
   "app": {
     "windows": [
       {
-        "title": "Meta | PCR",
+        "title": "AutoSketch - PCR",
         "width": 800,
         "height": 600,
         "resizable": true,
