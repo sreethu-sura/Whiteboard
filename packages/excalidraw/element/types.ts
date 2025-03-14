@@ -98,11 +98,20 @@ export type ExcalidrawEllipseElement = _ExcalidrawElementBase & {
 
 export type ExcalidrawCuboidElement = _ExcalidrawElementBase & {
   type: "cuboid";
-  // add an extra property for the 3D height (vertical dimension)
-  
-
+  topView?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  elevationView?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  currentView?: "top" | "elevation";
 };
-
 
 export type ExcalidrawEmbeddableElement = _ExcalidrawElementBase &
   Readonly<{
@@ -229,7 +238,6 @@ export type ExcalidrawNonSelectionElement = Exclude<
   ExcalidrawElement,
   ExcalidrawSelectionElement
 >;
-
 
 export type Ordered<TElement extends ExcalidrawElement> = TElement & {
   index: FractionalIndex;
@@ -426,6 +434,3 @@ export type NonDeletedSceneElementsMap = Map<
 export type ElementsMapOrArray =
   | readonly ExcalidrawElement[]
   | Readonly<ElementsMap>;
-
-
-

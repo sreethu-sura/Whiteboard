@@ -2275,3 +2275,45 @@ export const CustomDataIcon = createIcon(
   </g>,
   tablerIconProps,
 );
+
+
+
+export const TopViewIcon = createIcon(
+  <g strokeWidth={1.25}>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    
+    {/* top face */}
+    <path d="M3 6l9 -4l9 4l-9 4z" stroke="black" fill="black" strokeWidth="1.5" />  
+    
+    {/* front face */}
+    <path d="M3 20v-14l9 4v14z" stroke="grey" strokeDasharray="4 2" fill="none" strokeWidth="1.5" />  
+    
+    {/* Dotted edges for hidden lines */}
+    <path d="M21 6v14l-9 4v-14z" stroke="grey" strokeDasharray="4 2" fill="none" strokeWidth="1.25" />  
+    <path d="M3 20l9 -4l9 4" stroke="grey" strokeDasharray="4 2" fill="none" strokeWidth="1.25" />  
+
+  </g>,
+  tablerIconProps,
+);
+
+
+
+export const ElevationViewIcon = createIcon(
+  <g strokeWidth={1.25}>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    
+    {/* top face */}
+    <path d="M3 6l9 -4l9 4l-9 4z" stroke="grey" strokeDasharray="4 2" fill="none" strokeWidth="1.5" />  
+    
+    {/* front face */}
+    <path d="M3 20v-14l9 4v14z" stroke="black" fill="black" strokeWidth="1.5" />  
+    
+    {/* Dotted edges for hidden lines */}
+    <path d="M21 6v14l-9 4v-14z" stroke="grey" strokeDasharray="4 2" fill="none" strokeWidth="1.25" />  
+    <path d="M3 20l9 -4l9 4" stroke="grey" strokeDasharray="4 2" fill="none" strokeWidth="1.25" />  
+
+  </g>,
+  tablerIconProps,
+);
+
+

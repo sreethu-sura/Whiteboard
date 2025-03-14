@@ -140,7 +140,8 @@ export type ActionName =
   | "cropEditor"
   | "wrapSelectionInFrame"
   | "saveToPdf"
-  | "exportToCsv";
+  | "exportToCsv"
+  | "toggleView";
 
 export type PanelComponentProps = {
   elements: readonly ExcalidrawElement[];

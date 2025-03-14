@@ -58,11 +58,55 @@ import Scene from "../scene/Scene";
 import { LaserPointerButton } from "./LaserPointerButton";
 import { TTDDialog } from "./TTDDialog/TTDDialog";
 import { Stats } from "./Stats";
-import { actionToggleStats } from "../actions";
+import { actionToggleStats } from "../actions/actionToggleStats";
+import { actionToggleView } from "../actions/actionToggleView";
+import { TopViewIcon, ElevationViewIcon } from "./icons";
+import { Tooltip } from "./Tooltip";
 import ElementLinkDialog from "./ElementLinkDialog";
 
 import "./LayerUI.scss";
 import "./Toolbar.scss";
+
+const viewToggleButtonStyles = `
+.view-toggle-button {
+  margin-right: 8px;
+}
+
+.view-toggle-button__button {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary-color);
+  padding: 0;
+}
+
+.view-toggle-button__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
+}
+
+.view-toggle-button__label {
+  font-size: 0.8em;
+}
+
+@media (max-width: 640px) {
+  .view-toggle-button__label {
+    display: none;
+  }
+}
+`;
+
+if (typeof document !== "undefined") {
+  const styleElement = document.createElement("style");
+  styleElement.innerHTML = viewToggleButtonStyles;
+  document.head.appendChild(styleElement);
+}
 
 interface LayerUIProps {
   actionManager: ActionManager;
@@ -344,6 +388,31 @@ const LayerUI = ({
               />
             )}
             {renderTopRightUI?.(device.editor.isMobile, appState)}
+            
+            {/* Toggle View Button */}
+            <Tooltip
+              label={t("labels.toggleView")}
+              long={false}
+            >
+              <Island padding={2} className="view-toggle-button">
+                <button
+                  className="view-toggle-button__button"
+                  onClick={() => {
+                    actionManager.executeAction(actionToggleView);
+                  }}
+                  title={t("labels.toggleView")}
+                  aria-label={t("labels.toggleView")}
+                >
+                  <div className="view-toggle-button__icon">
+                    {appState.currentView === "top" ? TopViewIcon : ElevationViewIcon}
+                  </div>
+                  <span className="view-toggle-button__label">
+                    {appState.currentView === "top" ? t("labels.topView") : t("labels.elevationView")}
+                  </span>
+                </button>
+              </Island>
+            </Tooltip>
+            
             {!appState.viewModeEnabled &&
               appState.openDialog?.name !== "elementLinkSelector" &&
               // hide button when sidebar docked

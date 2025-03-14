@@ -125,12 +125,12 @@ export const SHAPES = [
   },
   {
     value: "cuboid",
-    icon: CuboidIcon, // You’ll need to create this icon component
-    shortcut: "}", // Choose a unique shortcut key
+    icon: CuboidIcon,
     key: KEYS.C,
-    numericKey: KEYS["0"],
-    fillable: true, // Whether the shape can be filled with color
+    numericKey: KEYS.SLASH,
+    fillable: true,
   },
+  
 ] as const;
 
 export const findShapeByKey = (key: string) => {
