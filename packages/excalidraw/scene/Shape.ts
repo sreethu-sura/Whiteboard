@@ -620,27 +620,8 @@ export const updateCuboidViewProperties = (
     let newHeight;
 
     if (isFirstInitialization) {
-      // Initialize BOTH views using current dimensions for active view
-      const activeHeight = element.height;
-      const otherHeight = element.currentView === "top" 
-        ? DEFAULT_ELEVATION_VIEW_HEIGHT
-        : DEFAULT_TOP_VIEW_HEIGHT;
-
-      updatedElement.topView = {
-        x: element.x,
-        y: element.y,
-        width: element.width,
-        height: element.currentView === "top" ? activeHeight : otherHeight
-      };
-
-      updatedElement.elevationView = {
-        x: element.x,
-        y: element.y,
-        width: element.width,
-        height: element.currentView === "elevation" ? activeHeight : otherHeight
-      };
-
-      newHeight = activeHeight; // Explicitly set for type safety
+      // If initializing for the first time, save the user's drawn dimensions
+      newHeight = element.height;
     } else if (!element.topView) {
       // If no top view exists yet (shouldn't happen with fixed code)
       newHeight = DEFAULT_TOP_VIEW_HEIGHT;
@@ -653,33 +634,31 @@ export const updateCuboidViewProperties = (
     updatedElement.y = element.y + (oldHeight - newHeight);
     updatedElement.height = newHeight;
 
+    // Store current dimensions in topView
+    updatedElement.topView = {
+      x: updatedElement.x,
+      y: updatedElement.y,
+      width: element.width,
+      height: newHeight, // Use the calculated height
+    };
+
+    // Initialize elevationView if it doesn't exist yet
+    if (!element.elevationView) {
+      updatedElement.elevationView = {
+        x: updatedElement.x,
+        y: updatedElement.y,
+        width: element.width,
+        height: DEFAULT_ELEVATION_VIEW_HEIGHT,
+      };
+    }
   } else if (element.currentView === "elevation") {
     // If switching from top to elevation view or initializing elevation view
     const oldHeight = element.height;
     let newHeight;
 
     if (isFirstInitialization) {
-      // Initialize BOTH views using current dimensions for active view
-      const activeHeight = element.height;
-      const otherHeight = element.currentView === "top" 
-        ? DEFAULT_ELEVATION_VIEW_HEIGHT
-        : DEFAULT_TOP_VIEW_HEIGHT;
-
-      updatedElement.topView = {
-        x: element.x,
-        y: element.y,
-        width: element.width,
-        height: element.currentView === "top" ? activeHeight : otherHeight
-      };
-
-      updatedElement.elevationView = {
-        x: element.x,
-        y: element.y,
-        width: element.width,
-        height: element.currentView === "elevation" ? activeHeight : otherHeight
-      };
-
-      newHeight = activeHeight; // Explicitly set for type safety
+      // If initializing for the first time, save the user's drawn dimensions
+      newHeight = element.height;
     } else if (!element.elevationView) {
       // If no elevation view exists yet (shouldn't happen with fixed code)
       newHeight = DEFAULT_ELEVATION_VIEW_HEIGHT;
@@ -692,6 +671,23 @@ export const updateCuboidViewProperties = (
     updatedElement.y = element.y + (oldHeight - newHeight);
     updatedElement.height = newHeight;
 
+    // Store current dimensions in elevationView
+    updatedElement.elevationView = {
+      x: updatedElement.x,
+      y: updatedElement.y,
+      width: element.width,
+      height: newHeight, // Use the calculated height
+    };
+
+    // Initialize topView if it doesn't exist yet
+    if (!element.topView) {
+      updatedElement.topView = {
+        x: updatedElement.x,
+        y: updatedElement.y,
+        width: element.width,
+        height: DEFAULT_TOP_VIEW_HEIGHT,
+      };
+    }
   }
 
   return updatedElement;
