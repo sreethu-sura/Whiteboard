@@ -2283,10 +2283,10 @@ export const TopViewIcon = createIcon(
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
     
     {/* top face */}
-    <path d="M3 6l9 -4l9 4l-9 4z" stroke="black" fill="black" strokeWidth="1.5" />  
+    <path d="M3 6l9 -4l9 4l-9 4z" stroke="currentColor" fill="currentColor" strokeWidth="1.5" />  
     
     {/* front face */}
-    <path d="M3 20v-14l9 4v14z" stroke="grey" strokeDasharray="4 2" fill="none" strokeWidth="1.5" />  
+    <path d="M3 20v-14l9 4v14z" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1.5" />  
     
     {/* Dotted edges for hidden lines */}
     <path d="M21 6v14l-9 4v-14z" stroke="grey" strokeDasharray="4 2" fill="none" strokeWidth="1.25" />  
@@ -2303,14 +2303,14 @@ export const ElevationViewIcon = createIcon(
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
     
     {/* top face */}
-    <path d="M3 6l9 -4l9 4l-9 4z" stroke="grey" strokeDasharray="4 2" fill="none" strokeWidth="1.5" />  
+    <path d="M3 6l9 -4l9 4l-9 4z" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1.5" />  
     
     {/* front face */}
-    <path d="M3 20v-14l9 4v14z" stroke="black" fill="black" strokeWidth="1.5" />  
+    <path d="M3 20v-14l9 4v14z" stroke="currentColor" fill="currentColor" strokeWidth="1.5" />  
     
     {/* Dotted edges for hidden lines */}
-    <path d="M21 6v14l-9 4v-14z" stroke="grey" strokeDasharray="4 2" fill="none" strokeWidth="1.25" />  
-    <path d="M3 20l9 -4l9 4" stroke="grey" strokeDasharray="4 2" fill="none" strokeWidth="1.25" />  
+    <path d="M21 6v14l-9 4v-14z" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1.25" />  
+    <path d="M3 20l9 -4l9 4" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1.25" />  
 
   </g>,
   tablerIconProps,
