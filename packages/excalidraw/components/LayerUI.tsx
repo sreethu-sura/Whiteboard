@@ -66,6 +66,8 @@ import ElementLinkDialog from "./ElementLinkDialog";
 
 import "./LayerUI.scss";
 import "./Toolbar.scss";
+import { DEFAULT_FONT_FAMILY } from "../constants";
+import { FONT_FAMILY } from "../constants";
 
 const viewToggleButtonStyles = `
 .view-toggle-button {
@@ -402,6 +404,8 @@ const LayerUI = ({
                   }}
                   title={t("labels.toggleView")}
                   aria-label={t("labels.toggleView")}
+                  style={{         fontFamily: Object.entries(FONT_FAMILY).find(([key, value]) => value === 6)?.[0] 
+                  }}
                 >
                   <div className="view-toggle-button__icon">
                     {appState.currentView === "top" ? TopViewIcon : ElevationViewIcon}
