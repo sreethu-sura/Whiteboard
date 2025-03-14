@@ -618,8 +618,9 @@ export const updateCuboidViewProperties = (
 
     // Keep the same width but use top view height
     if (!element.topView) {
-      // If no top view exists yet, use default height
-      newHeight = DEFAULT_TOP_VIEW_HEIGHT;
+      // If no top view exists yet, use the current height (drawn by user)
+      // instead of default height
+      newHeight = element.height;
     } else {
       // Use previously saved top view height
       newHeight = element.topView.height;
@@ -636,6 +637,16 @@ export const updateCuboidViewProperties = (
       width: element.width,
       height: updatedElement.height,
     };
+
+    // Initialize elevationView if it doesn't exist yet
+    if (!element.elevationView) {
+      updatedElement.elevationView = {
+        x: updatedElement.x,
+        y: updatedElement.y,
+        width: element.width,
+        height: DEFAULT_ELEVATION_VIEW_HEIGHT,
+      };
+    }
   } else if (element.currentView === "elevation") {
     // If switching from top to elevation view or initializing elevation view
     const oldHeight = element.height;
@@ -643,8 +654,9 @@ export const updateCuboidViewProperties = (
 
     // Keep the same width but use elevation view height
     if (!element.elevationView) {
-      // If no elevation view exists yet, use default height
-      newHeight = DEFAULT_ELEVATION_VIEW_HEIGHT;
+      // If no elevation view exists yet, use the current height (drawn by user)
+      // instead of default height
+      newHeight = element.height;
     } else {
       // Use previously saved elevation view height
       newHeight = element.elevationView.height;
@@ -661,6 +673,16 @@ export const updateCuboidViewProperties = (
       width: element.width,
       height: updatedElement.height,
     };
+
+    // Initialize topView if it doesn't exist yet
+    if (!element.topView) {
+      updatedElement.topView = {
+        x: updatedElement.x,
+        y: updatedElement.y,
+        width: element.width,
+        height: DEFAULT_TOP_VIEW_HEIGHT,
+      };
+    }
   }
 
   return updatedElement;
