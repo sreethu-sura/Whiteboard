@@ -93,3 +93,4 @@ export { actionToggleSearchMenu } from "./actionToggleSearchMenu";
 
 export { actionToggleCropEditor } from "./actionCropEditor";
 export { actionToggleView } from "./actionToggleView";
+export { actionToggleElementVisibility, actionShowAllElements } from "./actionElementVisibility";

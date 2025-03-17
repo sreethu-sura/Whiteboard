@@ -25,8 +25,12 @@ import {
 import { canChangeRoundness } from "./comparisons";
 import type { EmbedsValidationStatus } from "../types";
 import { pointFrom, pointDistance, type LocalPoint } from "../../math";
+import { degreesToRadians } from "../../math/angle";
+import { type Degrees, type Radians } from "../../math/types";
 import { getCornerRadius, isPathALoop } from "../shapes";
 import { headingForPointIsHorizontal } from "../element/heading";
+import { newElement } from "../element/newElement";
+import { nanoid } from "nanoid"; // Import nanoid
 
 const getDashArrayDashed = (strokeWidth: number) => [8, 8 + strokeWidth];
 
@@ -691,6 +695,105 @@ export const updateCuboidViewProperties = (
   }
 
   return updatedElement;
+};
+
+// Create a new cuboid element that is linked to the original but only appears in elevation view
+// Also creates 5 equally spaced horizontal lines inside the cuboid
+export const createElevationViewCuboid = (
+  originalElement: ExcalidrawCuboidElement,
+  appState: { currentView: "top" | "elevation" },
+): ExcalidrawElement[] => {
+  // Calculate position for the new element (to the right of the original)
+  const SPACING = 1000; // Increase spacing between the original and new cuboid for better visibility
+  const newX = originalElement.x + originalElement.width + SPACING;
+
+  // Use the elevation view dimensions if available, otherwise use defaults
+  const width = originalElement.elevationView?.width || originalElement.width;
+  const height = originalElement.elevationView?.height || 350;
+
+  // Calculate y position to align bottom edges
+  // Bottom edge of original = originalElement.y + originalElement.height
+  // For new element, we need y such that y + height = bottom edge of original
+  const bottomEdge = originalElement.y + originalElement.height;
+  const newY = bottomEdge - height;
+
+  // Create a new cuboid element with elevation view dimensions
+  const newCuboid: ExcalidrawElement = {
+    ...originalElement,
+    id: nanoid(), // Generate a new ID for the element
+    x: newX,
+    y: newY, // Use the calculated y to align bottom edges
+    width: width,
+    height: height,
+    isElevationOnly: true, // Mark as elevation-only
+    currentView: "elevation", // Set current view
+    linkedElementId: originalElement.id, // Link to the original element
+    angle: degreesToRadians(0 as Degrees),
+  };
+
+  // Create 5 equally spaced horizontal lines
+  const lineElements: ExcalidrawElement[] = [];
+
+  // Calculate the spacing between lines based on the elevation height
+  // We want to divide the height into 6 equal parts to get 5 lines
+  const lineSpacing = height / 6;
+
+  // Calculate the number of lines based on the height
+  // For very small heights, we might want fewer lines
+  const numLines = height < 100 ? 3 : 5;
+
+  // Adjust spacing for the actual number of lines
+  const adjustedSpacing = height / (numLines + 1);
+
+  for (let i = 1; i <= numLines; i++) {
+    const lineY = newY + i * adjustedSpacing;
+
+    // Create a line element
+    const lineElement: ExcalidrawLinearElement = {
+      type: "line",
+      id: nanoid(),
+      x: newX + 1, // Start slightly inside the left edge of the cuboid
+      y: lineY,
+      width: width - 2, // Line width slightly less than cuboid width
+      height: 0, // Horizontal line has no height
+      isElevationOnly: true, // Only show in elevation view
+      currentView: "elevation",
+      strokeColor: originalElement.strokeColor,
+      backgroundColor: "transparent",
+      fillStyle: "solid",
+      strokeWidth: originalElement.strokeWidth / 2, // Thinner lines
+      strokeStyle: "solid",
+      roughness: originalElement.roughness,
+      opacity: originalElement.opacity,
+      points: [
+        pointFrom<LocalPoint>(0, 0), // Start point (relative to x,y)
+        pointFrom<LocalPoint>(width - 2, 0), // End point (relative to x,y)
+      ],
+      lastCommittedPoint: null,
+      startBinding: null,
+      endBinding: null,
+      startArrowhead: null,
+      endArrowhead: null,
+      locked: false,
+      link: null,
+      frameId: null,
+      roundness: null,
+      boundElements: null,
+      updated: Date.now(),
+      seed: Math.random(),
+      version: 1,
+      versionNonce: 0,
+      isDeleted: false,
+      groupIds: [],
+      angle: degreesToRadians(0 as Degrees),
+      index: "0" as any, // Add the index property required by ExcalidrawLinearElement
+    };
+
+    lineElements.push(lineElement);
+  }
+
+  // Return the cuboid and all the line elements
+  return [newCuboid, ...lineElements];
 };
 
 const generateElbowArrowShape = (

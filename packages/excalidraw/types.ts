@@ -186,6 +186,8 @@ export type StaticCanvasAppState = Readonly<
     hoveredElementIds: AppState["hoveredElementIds"];
     // Cropping
     croppingElementId: AppState["croppingElementId"];
+    // View mode (top/elevation)
+    currentView: AppState["currentView"];
   }
 >;
 

@@ -150,6 +150,12 @@
       "lockAll": "Lock all",
       "unlockAll": "Unlock all"
     },
+    "elementVisibility": {
+      "hide": "Hide",
+      "show": "Show",
+      "hideAll": "Hide all",
+      "showAll": "Show all"
+    },
     "statusPublished": "Published",
     "sidebarLock": "Keep sidebar open",
     "selectAllElementsInFrame": "Select all elements in frame",

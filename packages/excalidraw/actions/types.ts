@@ -141,7 +141,9 @@ export type ActionName =
   | "wrapSelectionInFrame"
   | "saveToPdf"
   | "exportToCsv"
-  | "toggleView";
+  | "toggleView"
+  | "toggleElementVisibility"
+  | "showAllElements";
 
 export type PanelComponentProps = {
   elements: readonly ExcalidrawElement[];

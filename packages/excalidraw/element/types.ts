@@ -76,6 +76,8 @@ type _ExcalidrawElementBase = Readonly<{
   updated: number;
   link: string | null;
   locked: boolean;
+  /** Whether the element is hidden from view */
+  hidden?: boolean;
   customData?: Record<string, any>;
   full_name?: string;
 }>;
@@ -111,6 +113,9 @@ export type ExcalidrawCuboidElement = _ExcalidrawElementBase & {
     height: number;
   };
   currentView?: "top" | "elevation";
+  isElevationOnly?: boolean;
+  linkedElementId?: string;
+  hasElevationCuboid?: boolean;
 };
 
 export type ExcalidrawEmbeddableElement = _ExcalidrawElementBase &
@@ -341,6 +346,8 @@ export type ExcalidrawLinearElement = _ExcalidrawElementBase &
     endBinding: PointBinding | null;
     startArrowhead: Arrowhead | null;
     endArrowhead: Arrowhead | null;
+    isElevationOnly?: boolean;
+    currentView?: "top" | "elevation";
   }>;
 
 export type FixedSegment = {
