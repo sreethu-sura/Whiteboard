@@ -55,7 +55,45 @@ export const WS_EVENTS = {
 // Set to false to disable Excalidraw Plus features
 export const isExcalidrawPlusSignedUser = false;
 
-// Add this warning
+// Update the warning message
 console.warn(
-  "🔒 NETWORK FEATURES DISABLED: This version of Excalidraw has all network connections disabled for security."
+  "🔒 FEATURES DISABLED: This version of Excalidraw has network connections and the Browse Libraries feature disabled for security. Personal library functionality is still available."
 );
+
+// Globally disable library browsing functionality
+(function disableLibraryBrowsing() {
+  if (typeof window !== 'undefined') {
+    // Override any potential library browsing methods
+    const originalOpen = window.open;
+    window.open = function(...args) {
+      // Block any library browsing URLs
+      const url = args[0];
+      if (url && (
+        url.includes('libraries.excalidraw.com') || 
+        url.includes('library-backend')
+      )) {
+        console.warn('Library browsing is disabled');
+        return null;
+      }
+      return originalOpen.apply(this, args);
+    };
+
+    // Add a MutationObserver to hide the Browse Libraries button if it appears
+    const observer = new MutationObserver((mutations) => {
+      const browseButtons = document.querySelectorAll('.library-menu-browse-button');
+      browseButtons.forEach(button => {
+        if (button instanceof HTMLElement) {
+          button.style.display = 'none';
+        }
+      });
+    });
+
+    // Start observing once the DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      observer.observe(document.body, { 
+        childList: true, 
+        subtree: true 
+      });
+    });
+  }
+})();

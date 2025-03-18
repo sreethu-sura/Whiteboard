@@ -16,13 +16,12 @@ export const InitializeApp = (props: Props) => {
 
   useEffect(() => {
     const updateLang = async () => {
-      await setLanguage(currentLang);
+      // Always use English regardless of props.langCode
+      await setLanguage(defaultLang);
       setLoading(false);
     };
-    const currentLang =
-      languages.find((lang) => lang.code === props.langCode) || defaultLang;
     updateLang();
-  }, [props.langCode]);
+  }, []); // Remove props.langCode dependency
 
   return loading ? <LoadingMessage theme={props.theme} /> : props.children;
 };

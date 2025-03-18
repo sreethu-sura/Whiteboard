@@ -207,6 +207,7 @@ export class LocalData {
     },
   });
 }
+
 export class LibraryIndexedDBAdapter {
   /** IndexedDB database and store name */
   private static idb_name = STORAGE_KEYS.IDB_LIBRARY;
@@ -224,10 +225,40 @@ export class LibraryIndexedDBAdapter {
       LibraryIndexedDBAdapter.store,
     );
 
+    // Block any potential network connections in the loaded data
+    if (IDBData && IDBData.libraryItems) {
+      // Filter out any items with external URLs or network-related properties
+      IDBData.libraryItems = IDBData.libraryItems.map(item => {
+        // Remove any publishedLibrary data which could trigger network requests
+        if (item.publishedLibraryRef) {
+          delete item.publishedLibraryRef;
+        }
+        if (item.status === "published") {
+          item.status = "unpublished";
+        }
+        return item;
+      });
+    }
+
     return IDBData || null;
   }
 
   static save(data: LibraryPersistedData): MaybePromise<void> {
+    // Block any potential network connections in the data being saved
+    if (data && data.libraryItems) {
+      // Filter out any items with external URLs or network-related properties
+      data.libraryItems = data.libraryItems.map(item => {
+        // Remove any publishedLibrary data which could trigger network requests
+        if (item.publishedLibraryRef) {
+          delete item.publishedLibraryRef;
+        }
+        if (item.status === "published") {
+          item.status = "unpublished";
+        }
+        return item;
+      });
+    }
+
     return set(
       LibraryIndexedDBAdapter.key,
       data,

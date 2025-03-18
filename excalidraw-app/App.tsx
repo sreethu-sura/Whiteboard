@@ -63,17 +63,9 @@ import { updateStaleImageStatuses } from "./data/FileManager";
 import { newElementWith } from "../packages/excalidraw/element/mutateElement";
 import { isInitializedImageElement } from "../packages/excalidraw/element/typeChecks";
 import { loadFilesFromFirebase } from "./data/firebase";
-import {
-  LibraryIndexedDBAdapter,
-  LibraryLocalStorageMigrationAdapter,
-  LocalData,
-} from "./data/LocalData";
+import { LocalData } from "./data/LocalData";
 import { isBrowserStorageStateNewer } from "./data/tabSync";
 import clsx from "clsx";
-import {
-  parseLibraryTokensFromUrl,
-  useHandleLibrary,
-} from "../packages/excalidraw/data/library";
 import { AppMainMenu } from "./components/AppMainMenu";
 import { AppWelcomeScreen } from "./components/AppWelcomeScreen";
 import { AppFooter } from "./components/AppFooter";
@@ -103,6 +95,13 @@ import DebugCanvas, {
 import { AIComponents } from "./components/AI";
 import { isElementLink } from "../packages/excalidraw/element/elementLink";
 import { atom } from "./app-jotai";
+import {
+  LibraryIndexedDBAdapter,
+  LibraryLocalStorageMigrationAdapter,
+} from "./data/LocalData";
+import { useHandleLibrary } from "../packages/excalidraw/data/library";
+import { CustomLibraryMenuControlButtons } from "./components/CustomLibraryMenuControlButtons";
+import CustomLibraryMenuBrowseButton from "./components/CustomLibraryMenuBrowseButton";
 
 export const collabErrorIndicatorAtom = atom<string | null>(null);
 
@@ -239,13 +238,6 @@ const ExcalidrawWrapper = () => {
 
   const [, setShareDialogState] = useAtom(shareDialogStateAtom);
 
-  useHandleLibrary({
-    excalidrawAPI,
-    adapter: LibraryIndexedDBAdapter,
-    // TODO maybe remove this in several months (shipped: 24-03-11)
-    migrationAdapter: LibraryLocalStorageMigrationAdapter,
-  });
-
   const [, forceRefresh] = useState(false);
 
   useEffect(() => {
@@ -334,21 +326,19 @@ const ExcalidrawWrapper = () => {
 
     const onHashChange = async (event: HashChangeEvent) => {
       event.preventDefault();
-      const libraryUrlTokens = parseLibraryTokensFromUrl();
-      if (!libraryUrlTokens) {
-        excalidrawAPI.updateScene({ appState: { isLoading: true } });
+      // Library functionality is disabled
+      excalidrawAPI.updateScene({ appState: { isLoading: true } });
 
-        initializeScene({ excalidrawAPI }).then((data) => {
-          loadImages(data);
-          if (data.scene) {
-            excalidrawAPI.updateScene({
-              ...data.scene,
-              ...restore(data.scene, null, null, { repairBindings: true }),
-              storeAction: StoreAction.CAPTURE,
-            });
-          }
-        });
-      }
+      initializeScene({ excalidrawAPI }).then((data) => {
+        loadImages(data);
+        if (data.scene) {
+          excalidrawAPI.updateScene({
+            ...data.scene,
+            ...restore(data.scene, null, null, { repairBindings: true }),
+            storeAction: StoreAction.CAPTURE,
+          });
+        }
+      });
     };
 
     const titleTimeout = setTimeout(
@@ -369,13 +359,6 @@ const ExcalidrawWrapper = () => {
           excalidrawAPI.updateScene({
             ...localDataState,
             storeAction: StoreAction.UPDATE,
-          });
-          LibraryIndexedDBAdapter.load().then((data) => {
-            if (data) {
-              excalidrawAPI.updateLibrary({
-                libraryItems: data.libraryItems,
-              });
-            }
           });
         }
 
@@ -544,6 +527,13 @@ const ExcalidrawWrapper = () => {
     );
   }
 
+  useHandleLibrary({
+    excalidrawAPI,
+    adapter: LibraryIndexedDBAdapter,
+    // TODO maybe remove this in several months (shipped: 24-03-11)
+    migrationAdapter: LibraryLocalStorageMigrationAdapter,
+  });
+
   return (
     <div
       style={{ height: "100%" }}
@@ -562,8 +552,10 @@ const ExcalidrawWrapper = () => {
               // Remove onExportToBackend
             },
           },
+          // Enable library menu but disable browse libraries feature
+          libraryMenu: true,
         }}
-        langCode={langCode}
+        langCode="en"
         renderCustomStats={renderCustomStats}
         detectScroll={false}
         handleKeyboardGlobally={true}
@@ -577,6 +569,13 @@ const ExcalidrawWrapper = () => {
             event.preventDefault();
             excalidrawAPI?.scrollToContent(element.link, { animate: true });
           }
+        }}
+        renderLibraryMenu={(libraryMenu) => {
+          (libraryMenu as any).LibraryMenuControlButtons =
+            CustomLibraryMenuControlButtons;
+          (libraryMenu as any).LibraryMenuBrowseButton =
+            CustomLibraryMenuBrowseButton;
+          return libraryMenu;
         }}
       >
         <AppMainMenu

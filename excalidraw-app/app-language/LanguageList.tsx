@@ -1,23 +1,33 @@
-import React from "react";
-import { useI18n, languages } from "../../packages/excalidraw/i18n";
-import { useSetAtom } from "../app-jotai";
-import { appLangCodeAtom } from "./language-state";
+import { useMemo } from "react";
+import { useI18n } from "../../packages/excalidraw/i18n";
+import { useAppLangCode } from "./language-state";
 
-export const LanguageList = ({ style }: { style?: React.CSSProperties }) => {
-  const { t, langCode } = useI18n();
-  const setLangCode = useSetAtom(appLangCodeAtom);
+export const LanguageList = () => {
+  const { t } = useI18n();
+  const [langCode, setLangCode] = useAppLangCode();
+
+  // Only show English option
+  const options = useMemo(() => {
+    return [
+      {
+        label: "English",
+        value: "en",
+      },
+    ];
+  }, []);
 
   return (
     <select
       className="dropdown-select dropdown-select__language"
-      onChange={({ target }) => setLangCode(target.value)}
+      onChange={(event) => {
+        setLangCode(event.target.value);
+      }}
       value={langCode}
       aria-label={t("buttons.selectLanguage")}
-      style={style}
     >
-      {languages.map((lang) => (
-        <option key={lang.code} value={lang.code}>
-          {lang.label}
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
         </option>
       ))}
     </select>
