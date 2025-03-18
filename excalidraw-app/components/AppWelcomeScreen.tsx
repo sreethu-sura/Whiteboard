@@ -4,6 +4,7 @@ import { useI18n } from "../../packages/excalidraw/i18n";
 import { WelcomeScreen } from "../../packages/excalidraw/index";
 import { isExcalidrawPlusSignedUser } from "../app_constants";
 import { POINTER_EVENTS } from "../../packages/excalidraw/constants";
+import { ExcalidrawLogo } from "../../packages/excalidraw/components/ExcalidrawLogo";
 
 export const AppWelcomeScreen: React.FC<{
   onCollabDialogOpen: () => any;
@@ -43,7 +44,10 @@ export const AppWelcomeScreen: React.FC<{
       <WelcomeScreen.Hints.ToolbarHint />
       <WelcomeScreen.Hints.HelpHint />
       <WelcomeScreen.Center>
-        <WelcomeScreen.Center.Logo />
+        <div className="welcome-screen-center__logo excalifont welcome-screen-decor">
+          <ExcalidrawLogo />
+          <span className="custom-logo-text">Autosketch - PCR</span>
+        </div>
         <WelcomeScreen.Center.Heading>
           {headingContent}
         </WelcomeScreen.Center.Heading>
