@@ -368,39 +368,13 @@ export const _generateElementShape = (
     case "cuboid": {
       let shape: ElementShapes[typeof element.type];
 
-      // Update the cuboid's view-specific properties if needed
-      if (element.type === "cuboid" && "currentView" in element) {
-        element = updateCuboidViewProperties(element as ExcalidrawCuboidElement) as typeof element;
-      }
+      try {
+        // Ensure we have default values if properties are missing
+        const width = element.width > 0 ? element.width : 100;
+        const height = element.height > 0 ? element.height : 100;
+        const y = 0;
 
-      // Check if we should use view-specific properties
-      if ("currentView" in element) {
-        // Get the appropriate view properties based on the current view
-        let width = element.width;
-        let height = element.height;
-        let y = 0;
-
-        const currentView = element.currentView;
-        if (currentView === "top" && element.topView && typeof element.topView === "object") {
-          // Use top view properties if available
-          const topView = element.topView;
-          // Use nullish coalescing to handle undefined properties
-          width = topView.width ?? element.width;
-          height = topView.height ?? element.height;
-        } else if (currentView === "elevation" && element.elevationView && typeof element.elevationView === "object") {
-          // Use elevation view properties if available
-          const elevationView = element.elevationView;
-          // Use nullish coalescing to handle undefined properties
-          width = elevationView.width ?? element.width;
-          height = elevationView.height ?? 350; // Initialize height to 350 pixels in elevation view
-          y = element.height - height;
-        } else if (currentView === "elevation") {
-          // If elevation view is not yet defined, initialize with default values
-          height = 350; // Default height for elevation view
-          y = element.height - height;
-        }
-
-        // Generate the shape with the view-specific properties
+        // Generate the shape with the basic properties
         if (element.roundness) {
           const r = getCornerRadius(Math.min(width, height), element);
           shape = generator.path(
@@ -411,37 +385,25 @@ export const _generateElementShape = (
           );
         } else {
           shape = generator.rectangle(
-            0,
-            y,
-            width,
-            height,
-            generateRoughOptions(element, false),
+            0, 
+            0, 
+            width, 
+            height, 
+            generateRoughOptions(element, false)
           );
         }
-      } else {
-        // Fallback to standard rendering if no view is specified
-        if (element.roundness) {
-          const w = element.width;
-          const h = element.height;
-          const r = getCornerRadius(Math.min(w, h), element);
-          shape = generator.path(
-            `M ${r} 0 L ${w - r} 0 Q ${w} 0, ${w} ${r} L ${w} ${h - r
-            } Q ${w} ${h}, ${w - r} ${h} L ${r} ${h} Q 0 ${h}, 0 ${h - r
-            } L 0 ${r} Q 0 0, ${r} 0`,
-            generateRoughOptions(element, true),
-          );
-        } else {
-          shape = generator.rectangle(
-            0,
-            0,
-            element.width,
-            element.height,
-            generateRoughOptions(element, false),
-          );
-        }
+        return shape;
+      } catch (error) {
+        console.error("Error generating cuboid shape:", error);
+        // Fallback to a simple rectangle if there's an error
+        return generator.rectangle(
+          0,
+          0,
+          element.width || 100,
+          element.height || 100,
+          generateRoughOptions(element, false)
+        );
       }
-
-      return shape;
     }
     case "diamond": {
       let shape: ElementShapes[typeof element.type];
@@ -600,200 +562,220 @@ export const _generateElementShape = (
   }
 };
 
-// Add this helper function to update cuboid view properties
+// Update the updateCuboidViewProperties function to be more robust
 export const updateCuboidViewProperties = (
   element: ExcalidrawCuboidElement,
 ): ExcalidrawCuboidElement => {
-  if (!element.currentView) {
+  try {
+    if (!element.currentView) {
+      return element;
+    }
+
+    // Create a mutable copy of the element
+    const updatedElement = { ...element };
+
+    // Default heights for each view
+    const DEFAULT_TOP_VIEW_HEIGHT = 250;
+    const DEFAULT_ELEVATION_VIEW_HEIGHT = 350;
+
+    // Check if this is the first time we're initializing the views
+    const isFirstInitialization = !element.topView && !element.elevationView;
+
+    if (element.currentView === "top") {
+      try {
+        // If switching from elevation to top view or initializing top view
+        const oldHeight = element.height || DEFAULT_TOP_VIEW_HEIGHT;
+        let newHeight;
+
+        if (isFirstInitialization) {
+          // If initializing for the first time, save the user's drawn dimensions
+          newHeight = element.height || DEFAULT_TOP_VIEW_HEIGHT;
+        } else if (!element.topView) {
+          // If no top view exists yet (shouldn't happen with fixed code)
+          newHeight = DEFAULT_TOP_VIEW_HEIGHT;
+        } else {
+          // Use previously saved top view height
+          newHeight = element.topView.height || DEFAULT_TOP_VIEW_HEIGHT;
+        }
+
+        // Adjust y-coordinate to maintain the same bottom edge
+        updatedElement.y = element.y + (oldHeight - newHeight);
+        updatedElement.height = newHeight;
+
+        // Store current dimensions in topView
+        updatedElement.topView = {
+          x: updatedElement.x,
+          y: updatedElement.y,
+          width: element.width || 100,
+          height: newHeight, // Use the calculated height
+        };
+
+        // Initialize elevationView if it doesn't exist yet
+        if (!element.elevationView) {
+          updatedElement.elevationView = {
+            x: updatedElement.x,
+            y: updatedElement.y,
+            width: element.width || 100,
+            height: DEFAULT_ELEVATION_VIEW_HEIGHT,
+          };
+        }
+      } catch (error) {
+        console.error("Error updating cuboid top view properties:", error);
+        // Keep using the current element properties if there's an error
+      }
+    } else if (element.currentView === "elevation") {
+      try {
+        // If switching from top to elevation view or initializing elevation view
+        const oldHeight = element.height || DEFAULT_ELEVATION_VIEW_HEIGHT;
+        let newHeight;
+
+        if (isFirstInitialization) {
+          // If initializing for the first time, save the user's drawn dimensions
+          newHeight = element.height || DEFAULT_ELEVATION_VIEW_HEIGHT;
+        } else if (!element.elevationView) {
+          // If no elevation view exists yet (shouldn't happen with fixed code)
+          newHeight = DEFAULT_ELEVATION_VIEW_HEIGHT;
+        } else {
+          // Use previously saved elevation view height
+          newHeight = element.elevationView.height || DEFAULT_ELEVATION_VIEW_HEIGHT;
+        }
+
+        // Adjust y-coordinate to maintain the same bottom edge
+        updatedElement.y = element.y + (oldHeight - newHeight);
+        updatedElement.height = newHeight;
+
+        // Store current dimensions in elevationView
+        updatedElement.elevationView = {
+          x: updatedElement.x,
+          y: updatedElement.y,
+          width: element.width || 100,
+          height: newHeight, // Use the calculated height
+        };
+
+        // Initialize topView if it doesn't exist yet
+        if (!element.topView) {
+          updatedElement.topView = {
+            x: updatedElement.x,
+            y: updatedElement.y,
+            width: element.width || 100,
+            height: DEFAULT_TOP_VIEW_HEIGHT,
+          };
+        }
+      } catch (error) {
+        console.error("Error updating cuboid elevation view properties:", error);
+        // Keep using the current element properties if there's an error
+      }
+    }
+
+    return updatedElement;
+  } catch (error) {
+    console.error("Error in updateCuboidViewProperties:", error);
     return element;
   }
-
-  // Create a mutable copy of the element
-  const updatedElement = { ...element };
-
-  // Default heights for each view
-  const DEFAULT_TOP_VIEW_HEIGHT = 250;
-  const DEFAULT_ELEVATION_VIEW_HEIGHT = 350;
-
-  // Check if this is the first time we're initializing the views
-  const isFirstInitialization = !element.topView && !element.elevationView;
-
-  if (element.currentView === "top") {
-    // If switching from elevation to top view or initializing top view
-    const oldHeight = element.height;
-    let newHeight;
-
-    if (isFirstInitialization) {
-      // If initializing for the first time, save the user's drawn dimensions
-      newHeight = element.height;
-    } else if (!element.topView) {
-      // If no top view exists yet (shouldn't happen with fixed code)
-      newHeight = DEFAULT_TOP_VIEW_HEIGHT;
-    } else {
-      // Use previously saved top view height
-      newHeight = element.topView.height;
-    }
-
-    // Adjust y-coordinate to maintain the same bottom edge
-    updatedElement.y = element.y + (oldHeight - newHeight);
-    updatedElement.height = newHeight;
-
-    // Store current dimensions in topView
-    updatedElement.topView = {
-      x: updatedElement.x,
-      y: updatedElement.y,
-      width: element.width,
-      height: newHeight, // Use the calculated height
-    };
-
-    // Initialize elevationView if it doesn't exist yet
-    if (!element.elevationView) {
-      updatedElement.elevationView = {
-        x: updatedElement.x,
-        y: updatedElement.y,
-        width: element.width,
-        height: DEFAULT_ELEVATION_VIEW_HEIGHT,
-      };
-    }
-  } else if (element.currentView === "elevation") {
-    // If switching from top to elevation view or initializing elevation view
-    const oldHeight = element.height;
-    let newHeight;
-
-    if (isFirstInitialization) {
-      // If initializing for the first time, save the user's drawn dimensions
-      newHeight = element.height;
-    } else if (!element.elevationView) {
-      // If no elevation view exists yet (shouldn't happen with fixed code)
-      newHeight = DEFAULT_ELEVATION_VIEW_HEIGHT;
-    } else {
-      // Use previously saved elevation view height
-      newHeight = element.elevationView.height;
-    }
-
-    // Adjust y-coordinate to maintain the same bottom edge
-    updatedElement.y = element.y + (oldHeight - newHeight);
-    updatedElement.height = newHeight;
-
-    // Store current dimensions in elevationView
-    updatedElement.elevationView = {
-      x: updatedElement.x,
-      y: updatedElement.y,
-      width: element.width,
-      height: newHeight, // Use the calculated height
-    };
-
-    // Initialize topView if it doesn't exist yet
-    if (!element.topView) {
-      updatedElement.topView = {
-        x: updatedElement.x,
-        y: updatedElement.y,
-        width: element.width,
-        height: DEFAULT_TOP_VIEW_HEIGHT,
-      };
-    }
-  }
-
-  return updatedElement;
 };
 
-// Create a new cuboid element that is linked to the original but only appears in elevation view
 // Also creates 5 equally spaced horizontal lines inside the cuboid
 export const createElevationViewCuboid = (
   originalElement: ExcalidrawCuboidElement,
   appState: { currentView: "top" | "elevation" },
 ): ExcalidrawElement[] => {
-  // Calculate position for the new element (to the right of the original)
-  const SPACING = 1000; // Increase spacing between the original and new cuboid for better visibility
-  const newX = originalElement.x + originalElement.width + SPACING;
+  try {
+    // Calculate position for the new element (to the right of the original)
+    const SPACING = 50; // Reasonable spacing
+    const newX = originalElement.x + (originalElement.width || 100) + SPACING;
 
-  // Use the elevation view dimensions if available, otherwise use defaults
-  const width = originalElement.elevationView?.width || originalElement.width;
-  const height = originalElement.elevationView?.height || 350;
+    // Use the elevation view dimensions if available, otherwise use defaults
+    const width = originalElement.elevationView?.width || originalElement.width || 100;
+    const height = originalElement.elevationView?.height || 350;
 
-  // Calculate y position to align bottom edges
-  // Bottom edge of original = originalElement.y + originalElement.height
-  // For new element, we need y such that y + height = bottom edge of original
-  const bottomEdge = originalElement.y + originalElement.height;
-  const newY = bottomEdge - height;
+    // Calculate y position to align bottom edges
+    // Bottom edge of original = originalElement.y + originalElement.height
+    // For new element, we need y such that y + height = bottom edge of original
+    const bottomEdge = originalElement.y + (originalElement.height || 100);
+    const newY = bottomEdge - height;
 
-  // Create a new cuboid element with elevation view dimensions
-  const newCuboid: ExcalidrawElement = {
-    ...originalElement,
-    id: nanoid(), // Generate a new ID for the element
-    x: newX,
-    y: newY, // Use the calculated y to align bottom edges
-    width: width,
-    height: height,
-    isElevationOnly: true, // Mark as elevation-only
-    currentView: "elevation", // Set current view
-    linkedElementId: originalElement.id, // Link to the original element
-    angle: degreesToRadians(0 as Degrees),
-  };
-
-  // Create 5 equally spaced horizontal lines
-  const lineElements: ExcalidrawElement[] = [];
-
-  // Calculate the spacing between lines based on the elevation height
-  // We want to divide the height into 6 equal parts to get 5 lines
-  const lineSpacing = height / 6;
-
-  // Calculate the number of lines based on the height
-  // For very small heights, we might want fewer lines
-  const numLines = height < 100 ? 3 : 5;
-
-  // Adjust spacing for the actual number of lines
-  const adjustedSpacing = height / (numLines + 1);
-
-  for (let i = 1; i <= numLines; i++) {
-    const lineY = newY + i * adjustedSpacing;
-
-    // Create a line element
-    const lineElement: ExcalidrawLinearElement = {
-      type: "line",
-      id: nanoid(),
-      x: newX + 1, // Start slightly inside the left edge of the cuboid
-      y: lineY,
-      width: width - 2, // Line width slightly less than cuboid width
-      height: 0, // Horizontal line has no height
-      isElevationOnly: true, // Only show in elevation view
-      currentView: "elevation",
-      strokeColor: originalElement.strokeColor,
-      backgroundColor: "transparent",
-      fillStyle: "solid",
-      strokeWidth: originalElement.strokeWidth / 2, // Thinner lines
-      strokeStyle: "solid",
-      roughness: originalElement.roughness,
-      opacity: originalElement.opacity,
-      points: [
-        pointFrom<LocalPoint>(0, 0), // Start point (relative to x,y)
-        pointFrom<LocalPoint>(width - 2, 0), // End point (relative to x,y)
-      ],
-      lastCommittedPoint: null,
-      startBinding: null,
-      endBinding: null,
-      startArrowhead: null,
-      endArrowhead: null,
-      locked: false,
-      link: null,
-      frameId: null,
-      roundness: null,
-      boundElements: null,
-      updated: Date.now(),
-      seed: Math.random(),
-      version: 1,
-      versionNonce: 0,
-      isDeleted: false,
-      groupIds: [],
+    // Create a new cuboid element with elevation view dimensions
+    const newCuboid: ExcalidrawElement = {
+      ...originalElement,
+      id: nanoid(), // Generate a new ID for the element
+      x: newX,
+      y: newY, // Use the calculated y to align bottom edges
+      width: width,
+      height: height,
+      isElevationOnly: true, // Mark as elevation-only
+      currentView: "elevation", // Set current view
+      linkedElementId: originalElement.id, // Link to the original element
       angle: degreesToRadians(0 as Degrees),
-      index: "0" as any, // Add the index property required by ExcalidrawLinearElement
     };
 
-    lineElements.push(lineElement);
-  }
+    // Create horizontal lines
+    const lineElements: ExcalidrawElement[] = [];
 
-  // Return the cuboid and all the line elements
-  return [newCuboid, ...lineElements];
+    try {
+      // Calculate the number of lines based on the height
+      // For very small heights, we might want fewer lines
+      const numLines = height < 100 ? 2 : 5;
+
+      // Adjust spacing for the actual number of lines
+      const adjustedSpacing = height / (numLines + 1);
+
+      for (let i = 1; i <= numLines; i++) {
+        const lineY = newY + i * adjustedSpacing;
+
+        // Create a line element
+        const lineElement: ExcalidrawLinearElement = {
+          type: "line",
+          id: nanoid(),
+          x: newX + 1, // Start slightly inside the left edge of the cuboid
+          y: lineY,
+          width: width - 2, // Line width slightly less than cuboid width
+          height: 0, // Horizontal line has no height
+          isElevationOnly: true, // Only show in elevation view
+          currentView: "elevation",
+          strokeColor: originalElement.strokeColor || "#000000",
+          backgroundColor: "transparent",
+          fillStyle: "solid",
+          strokeWidth: (originalElement.strokeWidth || 1) / 2, // Thinner lines
+          strokeStyle: "solid",
+          roughness: originalElement.roughness || 1,
+          opacity: originalElement.opacity || 100,
+          points: [
+            pointFrom<LocalPoint>(0, 0), // Start point (relative to x,y)
+            pointFrom<LocalPoint>(width - 2, 0), // End point (relative to x,y)
+          ],
+          lastCommittedPoint: null,
+          startBinding: null,
+          endBinding: null,
+          startArrowhead: null,
+          endArrowhead: null,
+          locked: false,
+          link: null,
+          frameId: null,
+          roundness: null,
+          boundElements: null,
+          updated: Date.now(),
+          seed: Math.random(),
+          version: 1,
+          versionNonce: 0,
+          isDeleted: false,
+          groupIds: [],
+          angle: degreesToRadians(0 as Degrees),
+          index: "0" as any, // Add the index property required by ExcalidrawLinearElement
+        };
+
+        lineElements.push(lineElement);
+      }
+    } catch (error) {
+      console.error("Error creating elevation view lines:", error);
+      // Continue without lines if there's an error
+    }
+
+    // Return the cuboid and all the line elements
+    return [newCuboid, ...lineElements];
+  } catch (error) {
+    console.error("Error creating elevation view cuboid:", error);
+    return []; // Return empty array if there's an error
+  }
 };
 
 const generateElbowArrowShape = (

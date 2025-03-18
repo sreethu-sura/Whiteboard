@@ -12,22 +12,9 @@ export const FILE_UPLOAD_MAX_BYTES = 3 * 1024 * 1024; // 3 MiB
 // 1 year (https://stackoverflow.com/a/25201898/927631)
 export const FILE_CACHE_MAX_AGE_SEC = 31536000;
 
-export const WS_EVENTS = {
-  SERVER_VOLATILE: "server-volatile-broadcast",
-  SERVER: "server-broadcast",
-  USER_FOLLOW_CHANGE: "user-follow",
-  USER_FOLLOW_ROOM_CHANGE: "user-follow-room-change",
-} as const;
+// Remove WS_EVENTS and WS_SUBTYPES
 
-export enum WS_SUBTYPES {
-  INVALID_RESPONSE = "INVALID_RESPONSE",
-  INIT = "SCENE_INIT",
-  UPDATE = "SCENE_UPDATE",
-  MOUSE_LOCATION = "MOUSE_LOCATION",
-  IDLE_STATUS = "IDLE_STATUS",
-  USER_VISIBLE_SCENE_BOUNDS = "USER_VISIBLE_SCENE_BOUNDS",
-}
-
+// Keep FIREBASE_STORAGE_PREFIXES for compatibility but note that they're not used
 export const FIREBASE_STORAGE_PREFIXES = {
   shareLinkFiles: `/files/shareLinks`,
   collabFiles: `/files/rooms`,
@@ -50,10 +37,4 @@ export const STORAGE_KEYS = {
   __LEGACY_LOCAL_STORAGE_LIBRARY: "excalidraw-library",
 } as const;
 
-export const COOKIES = {
-  AUTH_STATE_COOKIE: "excplus-auth",
-} as const;
-
-export const isExcalidrawPlusSignedUser = document.cookie.includes(
-  COOKIES.AUTH_STATE_COOKIE,
-);
+// Remove COOKIES and isExcalidrawPlusSignedUser

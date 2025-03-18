@@ -200,42 +200,9 @@ const importFromBackend = async (
   id: string,
   decryptionKey: string,
 ): Promise<ImportedDataState> => {
-  try {
-    const response = await fetch(`${BACKEND_V2_GET}${id}`);
-
-    if (!response.ok) {
-      window.alert(t("alerts.importBackendFailed"));
-      return {};
-    }
-    const buffer = await response.arrayBuffer();
-
-    try {
-      const { data: decodedBuffer } = await decompressData(
-        new Uint8Array(buffer),
-        {
-          decryptionKey,
-        },
-      );
-      const data: ImportedDataState = JSON.parse(
-        new TextDecoder().decode(decodedBuffer),
-      );
-
-      return {
-        elements: data.elements || null,
-        appState: data.appState || null,
-      };
-    } catch (error: any) {
-      console.warn(
-        "error when decoding shareLink data using the new format:",
-        error,
-      );
-      return legacy_decodeFromBackend({ buffer, decryptionKey });
-    }
-  } catch (error: any) {
-    window.alert(t("alerts.importBackendFailed"));
-    console.error(error);
-    return {};
-  }
+  // Disabled to prevent internet connections
+  console.log("importFromBackend disabled to prevent internet connections");
+  return {};
 };
 
 export const loadScene = async (
@@ -246,21 +213,10 @@ export const loadScene = async (
   // Non-optional so we don't forget to pass it even if `undefined`.
   localDataState: ImportedDataState | undefined | null,
 ) => {
-  let data;
-  if (id != null && privateKey != null) {
-    // the private key is used to decrypt the content from the server, take
-    // extra care not to leak it
-    data = restore(
-      await importFromBackend(id, privateKey),
-      localDataState?.appState,
-      localDataState?.elements,
-      { repairBindings: true, refreshDimensions: false },
-    );
-  } else {
-    data = restore(localDataState || null, null, null, {
-      repairBindings: true,
-    });
-  }
+  // Skip any backend loading attempts
+  const data = restore(localDataState || null, null, null, {
+    repairBindings: true,
+  });
 
   return {
     elements: data.elements,
@@ -281,58 +237,9 @@ export const exportToBackend = async (
   appState: Partial<AppState>,
   files: BinaryFiles,
 ): Promise<ExportToBackendResult> => {
-  const encryptionKey = await generateEncryptionKey("string");
-
-  const payload = await compressData(
-    new TextEncoder().encode(
-      serializeAsJSON(elements, appState, files, "database"),
-    ),
-    { encryptionKey },
-  );
-
-  try {
-    const filesMap = new Map<FileId, BinaryFileData>();
-    for (const element of elements) {
-      if (isInitializedImageElement(element) && files[element.fileId]) {
-        filesMap.set(element.fileId, files[element.fileId]);
-      }
-    }
-
-    const filesToUpload = await encodeFilesForUpload({
-      files: filesMap,
-      encryptionKey,
-      maxBytes: FILE_UPLOAD_MAX_BYTES,
-    });
-
-    const response = await fetch(BACKEND_V2_POST, {
-      method: "POST",
-      body: payload.buffer,
-    });
-    const json = await response.json();
-    if (json.id) {
-      const url = new URL(window.location.href);
-      // We need to store the key (and less importantly the id) as hash instead
-      // of queryParam in order to never send it to the server
-      url.hash = `json=${json.id},${encryptionKey}`;
-      const urlString = url.toString();
-
-      await saveFilesToFirebase({
-        prefix: `/files/shareLinks/${json.id}`,
-        files: filesToUpload,
-      });
-
-      return { url: urlString, errorMessage: null };
-    } else if (json.error_class === "RequestTooLargeError") {
-      return {
-        url: null,
-        errorMessage: t("alerts.couldNotCreateShareableLinkTooBig"),
-      };
-    }
-
-    return { url: null, errorMessage: t("alerts.couldNotCreateShareableLink") };
-  } catch (error: any) {
-    console.error(error);
-
-    return { url: null, errorMessage: t("alerts.couldNotCreateShareableLink") };
-  }
+  // Disabled to prevent internet connections
+  return {
+    url: null,
+    errorMessage: "Exporting to backend disabled to prevent internet connections",
+  };
 };

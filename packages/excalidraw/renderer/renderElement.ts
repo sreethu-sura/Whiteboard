@@ -963,116 +963,94 @@ export const renderElement = (
       break;
     }
     case "cuboid": {
-      // Handle cuboid elements differently based on the current view
-      if ("currentView" in appState) {
-        // Force regenerate the shape for cuboid when the view changes
-        if ((element as ExcalidrawCuboidElement).currentView !== appState.currentView) {
-          // Update the element's currentView to match appState
-          const currentView = appState.currentView;
-          if (currentView === "top" || currentView === "elevation") {
-            element = {
-              ...element,
-              currentView: currentView,
-            };
+      try {
+        // Handle cuboid elements differently based on the current view
+        if ("currentView" in appState) {
+          // Force regenerate the shape for cuboid when the view changes
+          if ((element as ExcalidrawCuboidElement).currentView !== appState.currentView) {
+            try {
+              // Update the element's currentView to match appState
+              const currentView = appState.currentView;
+              if (currentView === "top" || currentView === "elevation") {
+                element = {
+                  ...element,
+                  currentView: currentView,
+                };
 
-            // Update view-specific properties
-            element = updateCuboidViewProperties(element as ExcalidrawCuboidElement);
-
-            // Clear the shape cache to force regeneration
-            ShapeCache.delete(element);
+                // Clear the shape cache to force regeneration
+                ShapeCache.delete(element);
+              }
+            } catch (error) {
+              console.error("Error updating cuboid view:", error);
+            }
           }
         }
-      }
 
-      // Generate the shape based on the current view
-      ShapeCache.generateElementShape(element, renderConfig);
+        // Generate the shape based on the current view
+        ShapeCache.generateElementShape(element, renderConfig);
 
-      if (renderConfig.isExporting) {
-        const [x1, y1, x2, y2] = getElementAbsoluteCoords(element, elementsMap);
-        const cx = (x1 + x2) / 2 + appState.scrollX;
-        const cy = (y1 + y2) / 2 + appState.scrollY;
-        const shiftX = (x2 - x1) / 2 - (element.x - x1);
-        const shiftY = (y2 - y1) / 2 - (element.y - y1);
+        if (renderConfig.isExporting) {
+          const [x1, y1, x2, y2] = getElementAbsoluteCoords(element, elementsMap);
+          const cx = (x1 + x2) / 2 + appState.scrollX;
+          const cy = (y1 + y2) / 2 + appState.scrollY;
+          const shiftX = (x2 - x1) / 2 - (element.x - x1);
+          const shiftY = (y2 - y1) / 2 - (element.y - y1);
 
-        context.save();
-        context.translate(cx, cy);
-        context.rotate(element.angle);
-        context.translate(-shiftX, -shiftY);
+          context.save();
+          context.translate(cx, cy);
+          context.rotate(element.angle);
+          context.translate(-shiftX, -shiftY);
 
-        // Draw the main cuboid element
-        drawElementOnCanvas(element, rc, context, renderConfig, appState);
+          // Draw the main cuboid element
+          drawElementOnCanvas(element, rc, context, renderConfig, appState);
 
-        // If in elevation view, create and render an additional cuboid for the elevation view
-        if ((element as ExcalidrawCuboidElement).currentView === "top" && (element as ExcalidrawCuboidElement).elevationView) {
-          // Only render the elevation view if we're in top view and have elevation data
-          const elevationViewOffset = element.width + 50; // 50px gap between views
-
-          // Create a temporary element for the elevation view
-          const elevationViewElement = {
-            ...element,
-            currentView: "elevation" as "elevation",
-            x: element.x + elevationViewOffset,
-            y: element.y + element.height - ((element as ExcalidrawCuboidElement).elevationView?.height || element.height), // Align bottom edges
-            width: (element as ExcalidrawCuboidElement).elevationView?.width ?? element.width,
-            height: (element as ExcalidrawCuboidElement).elevationView?.height ?? element.height,
-          };
-
-          // Draw the elevation view
-          drawElementOnCanvas(elevationViewElement, rc, context, renderConfig, appState);
-        }
-
-        context.restore();
-      } else {
-        // Non-exporting rendering path
-        const elementWithCanvas = generateElementWithCanvas(
-          element,
-          allElementsMap,
-          renderConfig,
-          appState,
-        );
-
-        if (!elementWithCanvas) {
-          return;
-        }
-
-        drawElementFromCanvas(
-          elementWithCanvas,
-          context,
-          renderConfig,
-          appState,
-          allElementsMap,
-        );
-
-        // If in elevation view, create and render an additional cuboid for the elevation view
-        if ((element as ExcalidrawCuboidElement).currentView === "top" && (element as ExcalidrawCuboidElement).elevationView) {
-          // Only render the elevation view if we're in top view and have elevation data
-          // Create a temporary element for the elevation view
-          const elevationViewElement = {
-            ...element,
-            currentView: "elevation" as "elevation",
-            x: element.x + element.width + 50, // 50px gap between views
-            y: element.y + element.height - ((element as ExcalidrawCuboidElement).elevationView?.height || element.height), // Align bottom edges
-            width: (element as ExcalidrawCuboidElement).elevationView?.width ?? element.width,
-            height: (element as ExcalidrawCuboidElement).elevationView?.height ?? element.height,
-          } as NonDeletedExcalidrawElement;
-
-          // Generate canvas for elevation view
-          const elevationViewWithCanvas = generateElementWithCanvas(
-            elevationViewElement,
+          context.restore();
+        } else {
+          // Non-exporting rendering path
+          const elementWithCanvas = generateElementWithCanvas(
+            element,
             allElementsMap,
             renderConfig,
             appState,
           );
 
-          if (elevationViewWithCanvas) {
-            drawElementFromCanvas(
-              elevationViewWithCanvas,
-              context,
-              renderConfig,
-              appState,
-              allElementsMap,
-            );
+          if (!elementWithCanvas) {
+            return;
           }
+
+          drawElementFromCanvas(
+            elementWithCanvas,
+            context,
+            renderConfig,
+            appState,
+            allElementsMap,
+          );
+        }
+      } catch (error) {
+        console.error("Error rendering cuboid:", error);
+        // If an error occurs, try to render a simple rectangle as a fallback
+        const simpleElement = {
+          ...element,
+          type: "rectangle",
+        };
+        ShapeCache.delete(simpleElement);
+        ShapeCache.generateElementShape(simpleElement, renderConfig);
+        
+        const elementWithCanvas = generateElementWithCanvas(
+          simpleElement,
+          allElementsMap,
+          renderConfig,
+          appState,
+        );
+
+        if (elementWithCanvas) {
+          drawElementFromCanvas(
+            elementWithCanvas,
+            context,
+            renderConfig,
+            appState,
+            allElementsMap,
+          );
         }
       }
       break;
