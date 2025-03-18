@@ -38,3 +38,24 @@ export const STORAGE_KEYS = {
 } as const;
 
 // Remove COOKIES and isExcalidrawPlusSignedUser
+
+// Add these constants to fix import errors
+export const WS_SUBTYPES = {
+  INVALID_RESPONSE: "invalid_response",
+  UPDATE: "update",
+  MOUSE_LOCATION: "mouse_location",
+  USER_VISIBLE_SCENE_BOUNDS: "user_visible_scene_bounds",
+  IDLE_STATUS: "idle_status",
+};
+
+export const WS_EVENTS = {
+  // Empty object to fix imports
+};
+
+// Set to false to disable Excalidraw Plus features
+export const isExcalidrawPlusSignedUser = false;
+
+// Add this warning
+console.warn(
+  "🔒 NETWORK FEATURES DISABLED: This version of Excalidraw has all network connections disabled for security."
+);

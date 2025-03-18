@@ -110,6 +110,7 @@ const getRelevantAppStateProps = (
   editingGroupId: appState.editingGroupId,
   currentHoveredFontFamily: appState.currentHoveredFontFamily,
   croppingElementId: appState.croppingElementId,
+  currentView: appState.currentView,
 });
 
 const areEqual = (

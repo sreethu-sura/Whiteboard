@@ -164,44 +164,32 @@ const restoreElementWithProperties = <
     // newly added elements
     version: element.version || 1,
     versionNonce: element.versionNonce ?? 0,
-    index: element.index ?? null,
     isDeleted: element.isDeleted ?? false,
     id: element.id || randomId(),
-    fillStyle: element.fillStyle || DEFAULT_ELEMENT_PROPS.fillStyle,
-    strokeWidth: element.strokeWidth || DEFAULT_ELEMENT_PROPS.strokeWidth,
-    strokeStyle: element.strokeStyle ?? DEFAULT_ELEMENT_PROPS.strokeStyle,
-    roughness: element.roughness ?? DEFAULT_ELEMENT_PROPS.roughness,
-    opacity:
-      element.opacity == null ? DEFAULT_ELEMENT_PROPS.opacity : element.opacity,
-    angle: element.angle || (0 as Radians),
-    x: extra.x ?? element.x ?? 0,
-    y: extra.y ?? element.y ?? 0,
-    strokeColor: element.strokeColor || DEFAULT_ELEMENT_PROPS.strokeColor,
-    backgroundColor:
-      element.backgroundColor || DEFAULT_ELEMENT_PROPS.backgroundColor,
+    fillStyle: element.fillStyle || "hachure",
+    strokeWidth: element.strokeWidth || 1,
+    strokeStyle: element.strokeStyle ?? "solid",
+    roundness: element.roundness ?? null,
+    roughness: element.roughness ?? 1,
+    opacity: element.opacity == null ? 100 : element.opacity,
+    angle: element.angle || 0,
+    x: element.x || 0,
+    y: element.y || 0,
+    strokeColor: element.strokeColor ?? BLACK_COLOR,
+    backgroundColor: element.backgroundColor ?? getDefaultColorForElementType(element.type),
     width: element.width || 0,
     height: element.height || 0,
-    seed: element.seed ?? 1,
+    seed: element.seed ?? randomInteger(),
     groupIds: element.groupIds ?? [],
     frameId: element.frameId ?? null,
-    roundness: element.roundness
-      ? element.roundness
-      : element.strokeSharpness === "round"
-      ? {
-          // for old elements that would now use adaptive radius algo,
-          // use legacy algo instead
-          type: isUsingAdaptiveRadius(element.type)
-            ? ROUNDNESS.LEGACY
-            : ROUNDNESS.PROPORTIONAL_RADIUS,
-        }
-      : null,
-    boundElements: element.boundElementIds
-      ? element.boundElementIds.map((id) => ({ type: "arrow", id }))
-      : element.boundElements ?? [],
-    updated: element.updated ?? getUpdatedTimestamp(),
-    link: element.link ? normalizeLink(element.link) : null,
+    roundnessType: element.roundnessType ?? null,
+    boundElements: element.boundElements ?? null,
+    updated: element.updated ?? Date.now(),
+    link: element.link ?? null,
     locked: element.locked ?? false,
-    full_name: element.full_name ?? undefined,
+    customData: element.customData,
+    full_name: element.full_name,
+    hidden: element.hidden ?? false,
   };
 
   if ("customData" in element || "customData" in extra) {

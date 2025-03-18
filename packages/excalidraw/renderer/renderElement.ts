@@ -1032,7 +1032,7 @@ export const renderElement = (
         const simpleElement = {
           ...element,
           type: "rectangle",
-        };
+        } as unknown as ExcalidrawRectangleElement; // Cast to more specific type
         ShapeCache.delete(simpleElement);
         ShapeCache.generateElementShape(simpleElement, renderConfig);
         

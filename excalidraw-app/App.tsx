@@ -86,7 +86,6 @@ import { openConfirmModal } from "../packages/excalidraw/components/OverwriteCon
 import { OverwriteConfirmDialog } from "../packages/excalidraw/components/OverwriteConfirm/OverwriteConfirm";
 import Trans from "../packages/excalidraw/components/Trans";
 import { ShareDialog, shareDialogStateAtom } from "./share/ShareDialog";
-import CollabError, { collabErrorIndicatorAtom } from "./collab/CollabError";
 import type { RemoteExcalidrawElement } from "../packages/excalidraw/data/reconcile";
 import {
   CommandPalette,
@@ -103,6 +102,11 @@ import DebugCanvas, {
 } from "./components/DebugCanvas";
 import { AIComponents } from "./components/AI";
 import { isElementLink } from "../packages/excalidraw/element/elementLink";
+import { atom } from "./app-jotai";
+
+export const collabErrorIndicatorAtom = atom<string | null>(null);
+
+const DISABLE_COLLABORATION = true;
 
 const initializeScene = async (opts: {
   excalidrawAPI: ExcalidrawImperativeAPI;
@@ -599,7 +603,9 @@ const ExcalidrawWrapper = () => {
 
         <ShareDialog
           onExportToBackend={() => {
-            setErrorMessage("Online sharing is disabled");
+            alert(
+              "Export to cloud is disabled to prevent internet connections.",
+            );
           }}
         />
 

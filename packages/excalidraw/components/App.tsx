@@ -5591,12 +5591,9 @@ class App extends React.Component<AppProps, AppState> {
         }
         if (!customEvent?.defaultPrevented) {
           const target = isLocalLink(url) ? "_self" : "_blank";
-          const newWindow = window.open(undefined, target);
-          // https://mathiasbynens.github.io/rel-noopener/
-          if (newWindow) {
-            newWindow.opener = null;
-            newWindow.location = url;
-          }
+          const newWindow = null; // window.open(undefined, target);
+          // Disable: newWindow.opener = null;
+          // Disable: newWindow.location = url;
         }
       }
     }
@@ -9470,7 +9467,7 @@ class App extends React.Component<AppProps, AppState> {
         !(hitElement && isElbowArrow(hitElement)) &&
         // not dragged
         !pointerDownState.drag.hasOccurred &&
-        // not resized
+        // not resizing
         !this.state.isResizing &&
         // only hitting the bounding box of the previous hit element
         ((hitElement &&
