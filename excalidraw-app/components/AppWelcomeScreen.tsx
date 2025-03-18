@@ -6,10 +6,7 @@ import { isExcalidrawPlusSignedUser } from "../app_constants";
 import { POINTER_EVENTS } from "../../packages/excalidraw/constants";
 import { ExcalidrawLogo } from "../../packages/excalidraw/components/ExcalidrawLogo";
 
-export const AppWelcomeScreen: React.FC<{
-  onCollabDialogOpen: () => any;
-  isCollabEnabled: boolean;
-}> = React.memo((props) => {
+export const AppWelcomeScreen: React.FC = React.memo(() => {
   const { t } = useI18n();
   let headingContent;
 
@@ -54,11 +51,6 @@ export const AppWelcomeScreen: React.FC<{
         <WelcomeScreen.Center.Menu>
           <WelcomeScreen.Center.MenuItemLoadScene />
           <WelcomeScreen.Center.MenuItemHelp />
-          {props.isCollabEnabled && (
-            <WelcomeScreen.Center.MenuItemLiveCollaborationTrigger
-              onSelect={() => props.onCollabDialogOpen()}
-            />
-          )}
           {!isExcalidrawPlusSignedUser && (
             <WelcomeScreen.Center.MenuItemLink
               href={`${
