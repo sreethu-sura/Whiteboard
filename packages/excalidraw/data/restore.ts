@@ -138,6 +138,12 @@ const repairBinding = <T extends ExcalidrawLinearElement>(
     : PointBinding | FixedPointBinding | null;
 };
 
+const ensureHiddenProperty = <T extends Pick<ExcalidrawElement, "hidden">>(
+  element: T
+): T & { hidden: boolean } => {
+  return element as T & { hidden: boolean };
+};
+
 const restoreElementWithProperties = <
   T extends Required<Omit<ExcalidrawElement, "customData" | "full_name">> & {
     customData?: ExcalidrawElement["customData"];
@@ -169,20 +175,30 @@ const restoreElementWithProperties = <
     fillStyle: element.fillStyle || "hachure",
     strokeWidth: element.strokeWidth || 1,
     strokeStyle: element.strokeStyle ?? "solid",
-    roundness: element.roundness ?? null,
     roughness: element.roughness ?? 1,
     opacity: element.opacity == null ? 100 : element.opacity,
-    angle: element.angle || 0,
+    angle: element.angle || 0 as T["angle"],
     x: element.x || 0,
     y: element.y || 0,
-    strokeColor: element.strokeColor ?? BLACK_COLOR,
-    backgroundColor: element.backgroundColor ?? getDefaultColorForElementType(element.type),
+    strokeColor: element.strokeColor ?? DEFAULT_ELEMENT_PROPS.strokeColor,
+    backgroundColor: element.backgroundColor ?? DEFAULT_ELEMENT_PROPS.backgroundColor,
     width: element.width || 0,
     height: element.height || 0,
-    seed: element.seed ?? randomInteger(),
+    seed: element.seed ?? 1,
     groupIds: element.groupIds ?? [],
     frameId: element.frameId ?? null,
-    roundnessType: element.roundnessType ?? null,
+    index: (element.index ?? 0) as T["index"],
+    roundness: element.roundness
+      ? element.roundness
+      : element.strokeSharpness === "round"
+      ? {
+          // for old elements that would now use adaptive radius algo,
+          // use legacy algo instead
+          type: isUsingAdaptiveRadius(element.type)
+            ? ROUNDNESS.LEGACY
+            : ROUNDNESS.PROPORTIONAL_RADIUS,
+        }
+      : null,
     boundElements: element.boundElements ?? null,
     updated: element.updated ?? Date.now(),
     link: element.link ?? null,
@@ -270,7 +286,7 @@ const restoreElement = (
           : // no element height likely means programmatic use, so default
             // to a fixed line height
             getLineHeight(element.fontFamily));
-      element = restoreElementWithProperties(element, {
+      element = restoreElementWithProperties(element as Required<typeof element>, {
         fontSize,
         fontFamily,
         text,
@@ -291,7 +307,7 @@ const restoreElement = (
 
       return element;
     case "freedraw": {
-      return restoreElementWithProperties(element, {
+      return restoreElementWithProperties(ensureHiddenProperty(element), {
         points: element.points,
         lastCommittedPoint: null,
         simulatePressure: element.simulatePressure,
@@ -299,7 +315,7 @@ const restoreElement = (
       });
     }
     case "image":
-      return restoreElementWithProperties(element, {
+      return restoreElementWithProperties(ensureHiddenProperty(element), {
         status: element.status || "pending",
         fileId: element.fileId,
         scale: element.scale || [1, 1],
@@ -321,7 +337,7 @@ const restoreElement = (
         ({ points, x, y } = LinearElementEditor.getNormalizedPoints(element));
       }
 
-      return restoreElementWithProperties(element, {
+      return restoreElementWithProperties(ensureHiddenProperty(element), {
         type:
           (element.type as ExcalidrawElementType | "draw") === "draw"
             ? "line"
@@ -365,7 +381,7 @@ const restoreElement = (
 
       // TODO: Separate arrow from linear element
       return isElbowArrow(element)
-        ? restoreElementWithProperties(element as ExcalidrawElbowArrowElement, {
+        ? restoreElementWithProperties(ensureHiddenProperty(element as ExcalidrawElbowArrowElement), {
             ...base,
             elbowed: true,
             startBinding: repairBinding(element, element.startBinding),
@@ -374,7 +390,7 @@ const restoreElement = (
             startIsSpecial: element.startIsSpecial,
             endIsSpecial: element.endIsSpecial,
           })
-        : restoreElementWithProperties(element as ExcalidrawArrowElement, base);
+        : restoreElementWithProperties(ensureHiddenProperty(element as ExcalidrawArrowElement), base);
     }
 
     // generic elements
@@ -384,10 +400,10 @@ const restoreElement = (
     case "diamond":
     case "iframe":
     case "embeddable":
-      return restoreElementWithProperties(element, {});
+      return restoreElementWithProperties(ensureHiddenProperty(element), {});
     case "magicframe":
     case "frame":
-      return restoreElementWithProperties(element, {
+      return restoreElementWithProperties(ensureHiddenProperty(element), {
         name: element.name ?? null,
       });
 

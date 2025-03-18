@@ -821,7 +821,7 @@ export interface ExcalidrawImperativeAPI {
   onScrollChange: (
     callback: (scrollX: number, scrollY: number, zoom: Zoom) => void,
   ) => UnsubscribeCallback;
-  onUserFollow: (
+  onUserFollow?: (
     callback: (payload: OnUserFollowedPayload) => void,
   ) => UnsubscribeCallback;
 }

@@ -35,6 +35,7 @@ import type {
   AppState,
   BinaryFileData,
   BinaryFiles,
+  LibraryItem,
 } from "../../packages/excalidraw/types";
 import type { MaybePromise } from "../../packages/excalidraw/utility-types";
 import { debounce } from "../../packages/excalidraw/utils";
@@ -42,6 +43,11 @@ import { SAVE_TO_LOCAL_STORAGE_TIMEOUT, STORAGE_KEYS } from "../app_constants";
 import { FileManager } from "./FileManager";
 import { Locker } from "./Locker";
 import { updateBrowserStateVersion } from "./tabSync";
+
+// Augment the LibraryItem type to include the publishedLibraryRef property
+interface ExtendedLibraryItem extends LibraryItem {
+  publishedLibraryRef?: unknown;
+}
 
 const filesStore = createStore("files-db", "files-store");
 
@@ -228,10 +234,10 @@ export class LibraryIndexedDBAdapter {
     // Block any potential network connections in the loaded data
     if (IDBData && IDBData.libraryItems) {
       // Filter out any items with external URLs or network-related properties
-      IDBData.libraryItems = IDBData.libraryItems.map(item => {
+      IDBData.libraryItems = IDBData.libraryItems.map((item) => {
         // Remove any publishedLibrary data which could trigger network requests
-        if (item.publishedLibraryRef) {
-          delete item.publishedLibraryRef;
+        if ((item as ExtendedLibraryItem).publishedLibraryRef) {
+          delete (item as ExtendedLibraryItem).publishedLibraryRef;
         }
         if (item.status === "published") {
           item.status = "unpublished";
@@ -247,10 +253,10 @@ export class LibraryIndexedDBAdapter {
     // Block any potential network connections in the data being saved
     if (data && data.libraryItems) {
       // Filter out any items with external URLs or network-related properties
-      data.libraryItems = data.libraryItems.map(item => {
+      data.libraryItems = data.libraryItems.map((item) => {
         // Remove any publishedLibrary data which could trigger network requests
-        if (item.publishedLibraryRef) {
-          delete item.publishedLibraryRef;
+        if ((item as ExtendedLibraryItem).publishedLibraryRef) {
+          delete (item as ExtendedLibraryItem).publishedLibraryRef;
         }
         if (item.status === "published") {
           item.status = "unpublished";

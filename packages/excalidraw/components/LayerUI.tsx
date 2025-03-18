@@ -29,7 +29,6 @@ import { HintViewer } from "./HintViewer";
 import { Island } from "./Island";
 import { LoadingMessage } from "./LoadingMessage";
 import { LockButton } from "./LockButton";
-import { MobileMenu } from "./MobileMenu";
 import { PasteChartDialog } from "./PasteChartDialog";
 import { Section } from "./Section";
 import { HelpDialog } from "./HelpDialog";
@@ -576,26 +575,7 @@ const LayerUI = ({
           }
         />
       )}
-      {device.editor.isMobile && (
-        <MobileMenu
-          app={app}
-          appState={appState}
-          elements={elements}
-          actionManager={actionManager}
-          renderJSONExportDialog={renderJSONExportDialog}
-          renderImageExportDialog={renderImageExportDialog}
-          setAppState={setAppState}
-          onLockToggle={onLockToggle}
-          onHandToolToggle={onHandToolToggle}
-          onPenModeToggle={onPenModeToggle}
-          renderTopRightUI={renderTopRightUI}
-          renderCustomStats={renderCustomStats}
-          renderSidebars={renderSidebars}
-          device={device}
-          renderWelcomeScreen={renderWelcomeScreen}
-          UIOptions={UIOptions}
-        />
-      )}
+      
       {!device.editor.isMobile && (
         <>
           <div

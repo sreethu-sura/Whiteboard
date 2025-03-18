@@ -93,6 +93,7 @@ export enum EVENT {
   // custom events
   EXCALIDRAW_LINK = "excalidraw-link",
   MENU_ITEM_SELECT = "menu.itemSelect",
+  WINDOW_RESIZE = "window-resize",
   MESSAGE = "message",
   FULLSCREENCHANGE = "fullscreenchange",
 }

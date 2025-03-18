@@ -8,6 +8,7 @@ import type {
   ExcalidrawFrameLikeElement,
   NonDeletedSceneElementsMap,
   ExcalidrawCuboidElement,
+  ExcalidrawRectangleElement,
   ElementsMap,
 } from "../element/types";
 import {
@@ -394,7 +395,6 @@ const drawElementOnCanvas = (
 ) => {
   switch (element.type) {
     case "rectangle":
-    case "cuboid":
     case "iframe":
     case "embeddable":
     case "diamond":
