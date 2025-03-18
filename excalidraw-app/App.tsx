@@ -107,6 +107,20 @@ export const collabErrorIndicatorAtom = atom<string | null>(null);
 
 const DISABLE_COLLABORATION = true;
 
+// Define shareable link confirm dialog
+const shareableLinkConfirmDialog = {
+  title: "Load from URL",
+  description: (
+    <Trans
+      i18nKey="overwriteConfirm.modal.shareableLink.description"
+      bold={(text) => <strong>{text}</strong>}
+      br={() => <br />}
+    />
+  ),
+  actionLabel: "Load scene",
+  color: "warning" as const,
+};
+
 const initializeScene = async (opts: {
   excalidrawAPI: ExcalidrawImperativeAPI;
 }): Promise<
@@ -553,7 +567,6 @@ const ExcalidrawWrapper = () => {
             },
           },
           // Enable library menu but disable browse libraries feature
-          libraryMenu: true,
         }}
         langCode="en"
         renderCustomStats={renderCustomStats}
@@ -569,13 +582,6 @@ const ExcalidrawWrapper = () => {
             event.preventDefault();
             excalidrawAPI?.scrollToContent(element.link, { animate: true });
           }
-        }}
-        renderLibraryMenu={(libraryMenu) => {
-          (libraryMenu as any).LibraryMenuControlButtons =
-            CustomLibraryMenuControlButtons;
-          (libraryMenu as any).LibraryMenuBrowseButton =
-            CustomLibraryMenuBrowseButton;
-          return libraryMenu;
         }}
       >
         <AppMainMenu
