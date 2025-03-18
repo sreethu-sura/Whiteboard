@@ -77,7 +77,6 @@ import { ShareableLinkDialog } from "../packages/excalidraw/components/Shareable
 import { openConfirmModal } from "../packages/excalidraw/components/OverwriteConfirm/OverwriteConfirmState";
 import { OverwriteConfirmDialog } from "../packages/excalidraw/components/OverwriteConfirm/OverwriteConfirm";
 import Trans from "../packages/excalidraw/components/Trans";
-import { ShareDialog, shareDialogStateAtom } from "./share/ShareDialog";
 import type { RemoteExcalidrawElement } from "../packages/excalidraw/data/reconcile";
 import {
   CommandPalette,
@@ -250,7 +249,6 @@ const ExcalidrawWrapper = () => {
   const [excalidrawAPI, excalidrawRefCallback] =
     useCallbackRefState<ExcalidrawImperativeAPI>();
 
-  const [, setShareDialogState] = useAtom(shareDialogStateAtom);
 
   const [, forceRefresh] = useState(false);
 
@@ -606,13 +604,6 @@ const ExcalidrawWrapper = () => {
           />
         )}
 
-        <ShareDialog
-          onExportToBackend={() => {
-            alert(
-              "Export to cloud is disabled to prevent internet connections.",
-            );
-          }}
-        />
 
         {errorMessage && (
           <ErrorDialog onClose={() => setErrorMessage("")}>
