@@ -14,11 +14,7 @@ export const FILE_CACHE_MAX_AGE_SEC = 31536000;
 
 // Remove WS_EVENTS and WS_SUBTYPES
 
-// Keep FIREBASE_STORAGE_PREFIXES for compatibility but note that they're not used
-export const FIREBASE_STORAGE_PREFIXES = {
-  shareLinkFiles: `/files/shareLinks`,
-  collabFiles: `/files/rooms`,
-};
+// Remove FIREBASE_STORAGE_PREFIXES
 
 export const ROOM_ID_BYTES = 10;
 
@@ -57,7 +53,7 @@ export const isExcalidrawPlusSignedUser = false;
 
 // Update the warning message
 console.warn(
-  "🔒 FEATURES DISABLED: This version of Excalidraw has network connections and the Browse Libraries feature disabled for security. Personal library functionality is still available."
+  "🔒 DESKTOP MODE: This is a desktop-only version of Excalidraw with all network connections disabled."
 );
 
 // Globally disable library browsing functionality
@@ -72,7 +68,7 @@ console.warn(
         url.includes('libraries.excalidraw.com') || 
         url.includes('library-backend')
       )) {
-        console.warn('Library browsing is disabled');
+        console.warn('Library browsing is disabled in desktop mode');
         return null;
       }
       return originalOpen.apply(this, args);

@@ -42,8 +42,9 @@ import {
   isRunningInIframe,
 } from "../packages/excalidraw/utils";
 import {
-  FIREBASE_STORAGE_PREFIXES,
   STORAGE_KEYS,
+  INITIAL_SCENE_UPDATE_TIMEOUT,
+  FILE_UPLOAD_TIMEOUT,
   SYNC_BROWSER_TABS_TIMEOUT,
 } from "./app_constants";
 import {
@@ -62,7 +63,6 @@ import { restore, restoreAppState } from "../packages/excalidraw/data/restore";
 import { updateStaleImageStatuses } from "./data/FileManager";
 import { newElementWith } from "../packages/excalidraw/element/mutateElement";
 import { isInitializedImageElement } from "../packages/excalidraw/element/typeChecks";
-import { loadFilesFromFirebase } from "./data/firebase";
 import { LocalData } from "./data/LocalData";
 import { isBrowserStorageStateNewer } from "./data/tabSync";
 import clsx from "clsx";
@@ -137,82 +137,35 @@ const initializeScene = async (opts: {
 
   const localDataState = importFromLocalStorage();
 
+  // In desktop mode, we only load from local storage
+  const restoredData = restore(localDataState, null, null, {
+    repairBindings: true,
+  });
   let scene: RestoredDataState & {
     scrollToContent?: boolean;
-  } = await loadScene(null, null, localDataState);
+  } = {
+    ...restoredData,
+    scrollToContent: false,
+  };
 
-  let roomLinkData = getCollaborationLinkData(window.location.href);
-  const isExternalScene = !!(id || jsonBackendMatch || roomLinkData);
-  if (isExternalScene) {
-    if (
-      // don't prompt if scene is empty
-      !scene.elements.length ||
-      // don't prompt for collab scenes because we don't override local storage
-      roomLinkData ||
-      // otherwise, prompt whether user wants to override current scene
-      (await openConfirmModal(shareableLinkConfirmDialog))
-    ) {
-      if (jsonBackendMatch) {
-        scene = await loadScene(
-          jsonBackendMatch[1],
-          jsonBackendMatch[2],
-          localDataState,
-        );
-      }
-      scene.scrollToContent = true;
-      if (!roomLinkData) {
-        window.history.replaceState({}, APP_NAME, window.location.origin);
-      }
-    } else {
-      // https://github.com/excalidraw/excalidraw/issues/1919
-      if (document.hidden) {
-        return new Promise((resolve, reject) => {
-          window.addEventListener(
-            "focus",
-            () => initializeScene(opts).then(resolve).catch(reject),
-            {
-              once: true,
-            },
-          );
-        });
-      }
-
-      roomLinkData = null;
-      window.history.replaceState({}, APP_NAME, window.location.origin);
-    }
+  // For desktop app, remove all external loading
+  if (id || jsonBackendMatch) {
+    // Just reset the URL without loading from backend
+    window.history.replaceState({}, APP_NAME, window.location.origin);
   } else if (externalUrlMatch) {
     window.history.replaceState({}, APP_NAME, window.location.origin);
-
-    const url = externalUrlMatch[1];
-    try {
-      const request = await fetch(window.decodeURIComponent(url));
-      const data = await loadFromBlob(await request.blob(), null, null);
-      if (
-        !scene.elements.length ||
-        (await openConfirmModal(shareableLinkConfirmDialog))
-      ) {
-        return { scene: data, isExternalScene };
-      }
-    } catch (error: any) {
-      return {
-        scene: {
-          appState: {
-            errorMessage: t("alerts.invalidSceneUrl"),
-          },
+    // Return error message for external URLs in desktop mode
+    return {
+      scene: {
+        appState: {
+          errorMessage: "Loading from URLs is disabled in desktop mode",
         },
-        isExternalScene,
-      };
-    }
+      },
+      isExternalScene: false,
+    };
   }
 
-  return isExternalScene && jsonBackendMatch
-    ? {
-        scene,
-        isExternalScene,
-        id: jsonBackendMatch[1],
-        key: jsonBackendMatch[2],
-      }
-    : { scene, isExternalScene: false };
+  return { scene, isExternalScene: false };
 };
 
 const ExcalidrawWrapper = () => {
@@ -248,7 +201,6 @@ const ExcalidrawWrapper = () => {
 
   const [excalidrawAPI, excalidrawRefCallback] =
     useCallbackRefState<ExcalidrawImperativeAPI>();
-
 
   const [, forceRefresh] = useState(false);
 
@@ -292,24 +244,7 @@ const ExcalidrawWrapper = () => {
         }, [] as FileId[]) || [];
 
       if (data.isExternalScene) {
-        // Comment out loading files from Firebase to prevent internet connections
-        /*
-        loadFilesFromFirebase(
-          `${FIREBASE_STORAGE_PREFIXES.shareLinkFiles}/${data.id}`,
-          data.key,
-          fileIds,
-        ).then(({ loadedFiles, erroredFiles }) => {
-          excalidrawAPI.addFiles(loadedFiles);
-          updateStaleImageStatuses({
-            excalidrawAPI,
-            erroredFiles,
-            elements: excalidrawAPI.getSceneElementsIncludingDeleted(),
-          });
-        });
-        */
-        console.log(
-          "External scene loading disabled to prevent internet connections",
-        );
+        console.log("External scene loading disabled in desktop version");
       } else if (isInitialLoad) {
         if (fileIds.length) {
           LocalData.fileStorage
@@ -561,10 +496,14 @@ const ExcalidrawWrapper = () => {
           canvasActions: {
             toggleTheme: true,
             export: {
-              // Remove onExportToBackend
+              saveFileToDisk: true,
+              onExportToBackend: () => null,
             },
+            clearCanvas: true,
           },
-          // Enable library menu but disable browse libraries feature
+          tools: {
+            image: true,
+          },
         }}
         langCode="en"
         renderCustomStats={renderCustomStats}
@@ -603,7 +542,6 @@ const ExcalidrawWrapper = () => {
             setErrorMessage={setErrorMessage}
           />
         )}
-
 
         {errorMessage && (
           <ErrorDialog onClose={() => setErrorMessage("")}>
