@@ -638,15 +638,7 @@ export const shareIOS = createIcon(
   { width: 24, height: 24 },
 );
 
-export const exportToPlus = createIcon(
-  <g strokeWidth={1.25}>
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M8 9h-1a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-8a2 2 0 0 0 -2 -2h-1" />
-    <path d="M12 14v-11" />
-    <path d="M9 6l3 -3l3 3" />
-  </g>,
-  tablerIconProps,
-);
+
 
 export const shareWindows = createIcon(
   <>
@@ -2221,7 +2213,6 @@ export const elementLinkIcon = createIcon(
   tablerIconProps,
 );
 
-
 export const PdfIcon = createIcon(
   <g strokeWidth="1.25">
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -2263,7 +2254,6 @@ export const CuboidIcon = createIcon(
   tablerIconProps,
 );
 
-
 export const CustomDataIcon = createIcon(
   <g strokeWidth={1.25}>
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -2276,42 +2266,82 @@ export const CustomDataIcon = createIcon(
   tablerIconProps,
 );
 
-
-
 export const TopViewIcon = createIcon(
   <g strokeWidth={1.25}>
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    
-    {/* top face */}
-    <path d="M3 6l9 -4l9 4l-9 4z" stroke="currentColor" fill="currentColor" strokeWidth="1" />  
-    
-    {/* front face */}
-    <path d="M3 20v-14l9 4v14z" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1" />  
-    
-    {/* Dotted edges for hidden lines */}
-    <path d="M21 6v14l-9 4v-14z" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1" />  
-    <path d="M3 20l9 -4l9 4" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1" />  
 
+    {/* top face */}
+    <path
+      d="M3 6l9 -4l9 4l-9 4z"
+      stroke="currentColor"
+      fill="currentColor"
+      strokeWidth="1"
+    />
+
+    {/* front face */}
+    <path
+      d="M3 20v-14l9 4v14z"
+      stroke="currentColor"
+      strokeDasharray="4 2"
+      fill="none"
+      strokeWidth="1"
+    />
+
+    {/* Dotted edges for hidden lines */}
+    <path
+      d="M21 6v14l-9 4v-14z"
+      stroke="currentColor"
+      strokeDasharray="4 2"
+      fill="none"
+      strokeWidth="1"
+    />
+    <path
+      d="M3 20l9 -4l9 4"
+      stroke="currentColor"
+      strokeDasharray="4 2"
+      fill="none"
+      strokeWidth="1"
+    />
   </g>,
   tablerIconProps,
 );
 
-
-
 export const ElevationViewIcon = createIcon(
   <g strokeWidth={1.25}>
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    
-    {/* top face */}
-    <path d="M3 6l9 -4l9 4l-9 4z" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1" />  
-    
-    {/* front face */}
-    <path d="M3 20v-14l9 4v14z" stroke="currentColor" fill="currentColor" strokeWidth="1" />  
-    
-    {/* Dotted edges for hidden lines */}
-    <path d="M21 6v14l-9 4v-14z" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1" />  
-    <path d="M3 20l9 -4l9 4" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1" />  
 
+    {/* top face */}
+    <path
+      d="M3 6l9 -4l9 4l-9 4z"
+      stroke="currentColor"
+      strokeDasharray="4 2"
+      fill="none"
+      strokeWidth="1"
+    />
+
+    {/* front face */}
+    <path
+      d="M3 20v-14l9 4v14z"
+      stroke="currentColor"
+      fill="currentColor"
+      strokeWidth="1"
+    />
+
+    {/* Dotted edges for hidden lines */}
+    <path
+      d="M21 6v14l-9 4v-14z"
+      stroke="currentColor"
+      strokeDasharray="4 2"
+      fill="none"
+      strokeWidth="1"
+    />
+    <path
+      d="M3 20l9 -4l9 4"
+      stroke="currentColor"
+      strokeDasharray="4 2"
+      fill="none"
+      strokeWidth="1"
+    />
   </g>,
   tablerIconProps,
 );
@@ -2319,38 +2349,79 @@ export const ElevationViewIcon = createIcon(
 export const EyeIcon = createIcon(
   <g strokeWidth={1.25}>
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    
-    {/* top face */}
-    <path d="M3 6l9 -4l9 4l-9 4z" stroke="currentColor" fill="currentColor" strokeWidth="1" />  
-    
-    {/* front face */}
-    <path d="M3 20v-14l9 4v14z" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1" />  
-    
-    {/* Dotted edges for hidden lines */}
-    <path d="M21 6v14l-9 4v-14z" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1" />  
-    <path d="M3 20l9 -4l9 4" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1" />  
 
+    {/* top face */}
+    <path
+      d="M3 6l9 -4l9 4l-9 4z"
+      stroke="currentColor"
+      fill="currentColor"
+      strokeWidth="1"
+    />
+
+    {/* front face */}
+    <path
+      d="M3 20v-14l9 4v14z"
+      stroke="currentColor"
+      strokeDasharray="4 2"
+      fill="none"
+      strokeWidth="1"
+    />
+
+    {/* Dotted edges for hidden lines */}
+    <path
+      d="M21 6v14l-9 4v-14z"
+      stroke="currentColor"
+      strokeDasharray="4 2"
+      fill="none"
+      strokeWidth="1"
+    />
+    <path
+      d="M3 20l9 -4l9 4"
+      stroke="currentColor"
+      strokeDasharray="4 2"
+      fill="none"
+      strokeWidth="1"
+    />
   </g>,
   tablerIconProps,
 );
-
-
 
 export const EyeSlashIcon = createIcon(
   <g strokeWidth={1.25}>
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    
-    {/* top face */}
-    <path d="M3 6l9 -4l9 4l-9 4z" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1" />  
-    
-    {/* front face */}
-    <path d="M3 20v-14l9 4v14z" stroke="currentColor" fill="currentColor" strokeWidth="1" />  
-    
-    {/* Dotted edges for hidden lines */}
-    <path d="M21 6v14l-9 4v-14z" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1" />  
-    <path d="M3 20l9 -4l9 4" stroke="currentColor" strokeDasharray="4 2" fill="none" strokeWidth="1" />  
 
+    {/* top face */}
+    <path
+      d="M3 6l9 -4l9 4l-9 4z"
+      stroke="currentColor"
+      strokeDasharray="4 2"
+      fill="none"
+      strokeWidth="1"
+    />
+
+    {/* front face */}
+    <path
+      d="M3 20v-14l9 4v14z"
+      stroke="currentColor"
+      fill="currentColor"
+      strokeWidth="1"
+    />
+
+    {/* Dotted edges for hidden lines */}
+    <path
+      d="M21 6v14l-9 4v-14z"
+      stroke="currentColor"
+      strokeDasharray="4 2"
+      fill="none"
+      strokeWidth="1"
+    />
+    <path
+      d="M3 20l9 -4l9 4"
+      stroke="currentColor"
+      strokeDasharray="4 2"
+      fill="none"
+      strokeWidth="1"
+    />
   </g>,
   tablerIconProps,
 );
-

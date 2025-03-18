@@ -33,8 +33,6 @@ export const STORAGE_KEYS = {
   __LEGACY_LOCAL_STORAGE_LIBRARY: "excalidraw-library",
 } as const;
 
-// Remove COOKIES and isExcalidrawPlusSignedUser
-
 // Add these constants to fix import errors
 export const WS_SUBTYPES = {
   INVALID_RESPONSE: "invalid_response",
@@ -47,9 +45,6 @@ export const WS_SUBTYPES = {
 export const WS_EVENTS = {    
   // Empty object to fix imports
 };
-
-// Set to false to disable Excalidraw Plus features
-export const isExcalidrawPlusSignedUser = false;
 
 // Update the warning message
 console.warn(
