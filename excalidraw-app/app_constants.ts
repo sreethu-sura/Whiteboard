@@ -48,7 +48,7 @@ export const WS_SUBTYPES = {
   IDLE_STATUS: "idle_status",
 };
 
-export const WS_EVENTS = {
+export const WS_EVENTS = {    
   // Empty object to fix imports
 };
 
@@ -68,7 +68,7 @@ console.warn(
     window.open = function(...args) {
       // Block any library browsing URLs
       const url = args[0];
-      if (url && (
+      if (url && typeof url === 'string' && (
         url.includes('libraries.excalidraw.com') || 
         url.includes('library-backend')
       )) {
