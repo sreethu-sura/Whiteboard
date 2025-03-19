@@ -175,11 +175,8 @@ export const dragSelectedElements = (
           // We'll only apply a new shift or keep existing shift to avoid jittering
           const shiftAmount = overlapAmount;
           
-          // Apply the shift to all right elements from their original positions
-          rightElements.forEach(element => {
-            const original = pointerDownState.originalElements.get(element.id) || element;
-            mutateElement(element, { x: original.x + shiftAmount });
-          });
+          // Use the helper function to move all right elements while preserving their relative positions
+          moveRightElements(rightElements, shiftAmount, pointerDownState, scene.getElementsMapIncludingDeleted());
         }
       }
       
@@ -190,7 +187,7 @@ export const dragSelectedElements = (
       ];
       
       allModifiedElements.forEach(element => {
-        updateBoundElements(element, elementsMap, {
+        updateBoundElements(element, scene.getElementsMapIncludingDeleted(), {
           simultaneouslyUpdated: allModifiedElements,
         });
       });
@@ -198,7 +195,7 @@ export const dragSelectedElements = (
       // If no left elements, just update bound elements for dragged elements
       elementsToUpdate.forEach(element => {
         if (!isArrowElement(element)) {
-          updateBoundElements(element, elementsMap, {
+          updateBoundElements(element, scene.getElementsMapIncludingDeleted(), {
             simultaneouslyUpdated: Array.from(elementsToUpdate),
           });
         }
@@ -248,7 +245,7 @@ const restoreShiftedElements = (
 // Helper function to check if an element has meaningful vertical overlap with the inserted element
 const hasVerticalOverlap = (
   element: NonDeletedExcalidrawElement,
-  elementsMap: Map<string, NonDeletedExcalidrawElement>,
+  elementsMap: ReturnType<Scene['getElementsMapIncludingDeleted']>,
   y1: number,
   y2: number,
 ): boolean => {
@@ -266,6 +263,71 @@ const hasVerticalOverlap = (
   
   // Consider it a meaningful overlap if it's at least 25% of the smaller height
   return verticalOverlapAmount >= 0.25 * minHeight;
+};
+
+// Helper function to move all right elements while preserving their relative positions
+const moveRightElements = (
+  rightElements: NonDeletedExcalidrawElement[],
+  shiftAmount: number,
+  pointerDownState: PointerDownState,
+  elementsMap: ReturnType<Scene['getElementsMapIncludingDeleted']>,
+) => {
+  // Group elements by their original x positions to preserve relative spacing
+  const elementsByOriginalX = new Map<number, NonDeletedExcalidrawElement[]>();
+  
+  // Collect original positions for all elements
+  rightElements.forEach(element => {
+    const original = pointerDownState.originalElements.get(element.id) || element;
+    const originalX = original.x;
+    
+    if (!elementsByOriginalX.has(originalX)) {
+      elementsByOriginalX.set(originalX, []);
+    }
+    elementsByOriginalX.get(originalX)!.push(element);
+  });
+  
+  // Sort positions to maintain relative ordering
+  const sortedPositions = Array.from(elementsByOriginalX.keys()).sort((a, b) => a - b);
+  
+  // Move each group of elements by the shift amount
+  sortedPositions.forEach(originalX => {
+    const elements = elementsByOriginalX.get(originalX)!;
+    elements.forEach(element => {
+      mutateElement(element, { x: originalX + shiftAmount });
+      
+      // Also update any text elements bound to this element
+      const textElement = getBoundTextElement(element, elementsMap);
+      if (textElement) {
+        const originalText = pointerDownState.originalElements.get(textElement.id) || textElement;
+        mutateElement(textElement, { x: originalText.x + shiftAmount });
+      }
+    });
+  });
+  
+  // Update bound elements for all right elements
+  rightElements.forEach(element => {
+    updateBoundElements(element, elementsMap, {
+      simultaneouslyUpdated: rightElements,
+    });
+  });
+};
+
+// Helper function to calculate the new bounds after applying shift
+const getNewBoundsAfterShift = (
+  rightElements: NonDeletedExcalidrawElement[],
+  shiftAmount: number,
+  pointerDownState: PointerDownState,
+): Bounds => {
+  // Create temporary copies with the shift applied
+  const shiftedElements = rightElements.map(element => {
+    const original = pointerDownState.originalElements.get(element.id) || element;
+    return {
+      ...original,
+      x: original.x + shiftAmount,
+    };
+  });
+  
+  return getCommonBounds(shiftedElements);
 };
 
 const calculateOffset = (
