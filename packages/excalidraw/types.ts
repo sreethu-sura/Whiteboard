@@ -717,6 +717,8 @@ export type PointerDownState = Readonly<{
   lastCoords: { x: number; y: number };
   // map of original elements data
   originalElements: Map<string, NonDeleted<ExcalidrawElement>>;
+  // Used to track shifted positions of elements in insert mode to prevent jittering
+  lastShiftedPositions?: Map<string, number>;
   resize: {
     // Handle when resizing, might change during the pointer interaction
     handleType: MaybeTransformHandleType;
