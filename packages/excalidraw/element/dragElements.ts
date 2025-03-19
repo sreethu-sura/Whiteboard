@@ -129,84 +129,81 @@ export const dragSelectedElements = (
       return centerX > x1;
     });
 
-    // Only process insert positioning if we have at least left elements
     if (leftElements.length > 0) {
       // Find rightmost edge of left elements
       const rightmostLeftEdge = Math.max(
         ...leftElements.map(el => getElementBounds(el, elementsMap)[2])
       );
       
-      // Get the original positions before any modifications
-      const originalPositions = new Map<NonDeletedExcalidrawElement, number>();
+      // Calculate how much to move the dragged elements to align with the left boundary
+      const leftAlignmentOffset = rightmostLeftEdge - x1;
+      
+      // Apply this offset to all dragged elements
       elementsToUpdate.forEach(element => {
-        const original = pointerDownState.originalElements.get(element.id);
-        if (original) {
-          originalPositions.set(element, original.x);
+        const newX = element.x + leftAlignmentOffset;
+        mutateElement(element, { x: newX });
+        
+        // Also handle text elements bound to this element
+        const textElement = getBoundTextElement(element, elementsMap);
+        if (textElement) {
+          mutateElement(textElement, { x: textElement.x + leftAlignmentOffset });
         }
       });
       
-      // Calculate how much we need to shift from current positions
-      const leftElementOffset = rightmostLeftEdge - x1;
+      // Get the new bounds after aligning with the left element
+      const newBounds = getCommonBounds(Array.from(elementsToUpdate));
+      const [_, __, newX2, ___] = newBounds;
       
-      // If we have right elements, calculate the right spacing
+      // Check if we need to adjust right elements
       if (rightElements.length > 0) {
         // Find leftmost edge of right elements
         const leftmostRightEdge = Math.min(
           ...rightElements.map(el => getElementBounds(el, elementsMap)[0])
         );
         
-        // Available space between leftmost and rightmost elements
-        const availableSpace = leftmostRightEdge - rightmostLeftEdge;
-        const neededSpace = x2 - x1; // Width of dragged elements
+        // Check if our elements overlap with right elements after alignment
+        const overlapAmount = Math.max(0, newX2 - leftmostRightEdge);
         
-        // If we don't have enough space, shift right elements
-        if (availableSpace < neededSpace) {
-          const shiftAmount = neededSpace - availableSpace;
-          
-          // Shift right elements by the exact amount needed
-          rightElements.forEach(element => {
+        // Only shift right elements if there's an overlap to create space
+        if (overlapAmount > 0) {
+          // Find if any right elements have already been shifted from their original position
+          const alreadyShifted = rightElements.some(element => {
             const original = pointerDownState.originalElements.get(element.id);
-            const currentX = element.x;
-            mutateElement(element, { 
-              x: currentX + shiftAmount
-            });
+            return original && element.x > original.x;
           });
-        } else {
-          // Otherwise restore right elements if they were previously shifted
-          restoreShiftedElements(rightElements, pointerDownState);
+          
+          // We'll only apply a new shift or keep existing shift to avoid jittering
+          const shiftAmount = overlapAmount;
+          
+          // Apply the shift to all right elements from their original positions
+          rightElements.forEach(element => {
+            const original = pointerDownState.originalElements.get(element.id) || element;
+            mutateElement(element, { x: original.x + shiftAmount });
+          });
         }
       }
       
-      // Now position the dragged elements exactly where they should be
-      elementsToUpdate.forEach(element => {
-        // Calculate the new position by adding the left offset
-        const newX = element.x + leftElementOffset;
-        
-        mutateElement(element, {
-          x: newX
+      // Update bound elements for all modified elements
+      const allModifiedElements = [
+        ...Array.from(elementsToUpdate),
+        ...rightElements
+      ];
+      
+      allModifiedElements.forEach(element => {
+        updateBoundElements(element, elementsMap, {
+          simultaneouslyUpdated: allModifiedElements,
         });
-        
-        // Also handle text elements bound to this element
-        const textElement = getBoundTextElement(element, elementsMap);
-        if (textElement) {
-          mutateElement(textElement, {
-            x: textElement.x + leftElementOffset
+      });
+    } else {
+      // If no left elements, just update bound elements for dragged elements
+      elementsToUpdate.forEach(element => {
+        if (!isArrowElement(element)) {
+          updateBoundElements(element, elementsMap, {
+            simultaneouslyUpdated: Array.from(elementsToUpdate),
           });
         }
       });
     }
-    
-    // Update bound elements for all modified elements
-    const allModifiedElements = [
-      ...Array.from(elementsToUpdate),
-      ...rightElements
-    ];
-    
-    allModifiedElements.forEach(element => {
-      updateBoundElements(element, elementsMap, {
-        simultaneouslyUpdated: allModifiedElements,
-      });
-    });
   } else {
     // Normal drag behavior
     elementsToUpdate.forEach((element) => {

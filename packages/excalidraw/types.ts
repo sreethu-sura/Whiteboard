@@ -719,6 +719,11 @@ export type PointerDownState = Readonly<{
   originalElements: Map<string, NonDeleted<ExcalidrawElement>>;
   // Used to track shifted positions of elements in insert mode to prevent jittering
   lastShiftedPositions?: Map<string, number>;
+  // Store state for insert mode to make element positioning smoother
+  insertModeMetadata?: {
+    rightElementsShifted: boolean;
+    rightShiftAmount: number;
+  };
   resize: {
     // Handle when resizing, might change during the pointer interaction
     handleType: MaybeTransformHandleType;
