@@ -17,6 +17,7 @@ export const actionToggleMode = register({
   predicate: (elements, appState) => true,
   checked: (appState) => appState.insertModeEnabled,
   perform: (elements, appState) => {
+    console.log("Toggling insert mode:", !appState.insertModeEnabled);
     return {
       appState: {
         ...appState,

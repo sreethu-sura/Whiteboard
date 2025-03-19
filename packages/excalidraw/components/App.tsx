@@ -559,7 +559,6 @@ const gesture: Gesture = {
   initialDistance: null,
   initialScale: null,
 };
-
 class App extends React.Component<AppProps, AppState> {
   canvas: AppClassProperties["canvas"];
   interactiveCanvas: AppClassProperties["interactiveCanvas"] = null;
@@ -1348,7 +1347,6 @@ class App extends React.Component<AppProps, AppState> {
     }
     this.setState({ editingFrame: null });
   };
-
   private renderFrameNames = () => {
     if (!this.state.frameRendering.enabled || !this.state.frameRendering.name) {
       if (this.state.editingFrame) {
@@ -8365,6 +8363,7 @@ class App extends React.Component<AppProps, AppState> {
               this.scene,
               snapOffset,
               event[KEYS.CTRL_OR_CMD] ? null : this.getEffectiveGridSize(),
+              this.state,
             );
           }
 
