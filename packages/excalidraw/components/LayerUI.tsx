@@ -48,7 +48,6 @@ import { HandButton } from "./HandButton";
 import { isHandToolActive } from "../appState";
 import { TunnelsContext, useInitializeTunnels } from "../context/tunnels";
 import { LibraryIcon } from "./icons";
-import { UIAppStateContext } from "../context/ui-appState";
 import { DefaultSidebar } from "./DefaultSidebar";
 import { EyeDropper, activeEyeDropperAtom } from "./EyeDropper";
 import { mutateElement } from "../element/mutateElement";
@@ -59,9 +58,16 @@ import { TTDDialog } from "./TTDDialog/TTDDialog";
 import { Stats } from "./Stats";
 import { actionToggleStats } from "../actions/actionToggleStats";
 import { actionToggleView } from "../actions/actionToggleView";
-import { TopViewIcon, ElevationViewIcon } from "./icons";
+import { actionToggleMode } from "../actions/actionToggleMode";
+import {
+  TopViewIcon,
+  ElevationViewIcon,
+  InsertModeIcon,
+  NormalModeIcon,
+} from "./icons";
 import { Tooltip } from "./Tooltip";
 import ElementLinkDialog from "./ElementLinkDialog";
+import { UIAppStateContext } from "../context/ui-appState";
 
 import "./LayerUI.scss";
 import "./Toolbar.scss";
@@ -443,6 +449,44 @@ const LayerUI = ({
                     {appState.currentView === "top"
                       ? t("labels.topView")
                       : t("labels.elevationView")}
+                  </span>
+                </button>
+              </Island>
+            </Tooltip>
+
+            {/* Toggle Mode Button */}
+            <Tooltip label={t("labels.toggleMode")}>
+              <Island
+                className="view-toggle-button"
+                padding={0}
+                style={{
+                  background: "transparent",
+                  borderColor: "transparent",
+                  boxShadow: "none",
+                }}
+              >
+                <button
+                  className="view-toggle-button__button"
+                  onClick={() => {
+                    actionManager.executeAction(actionToggleMode);
+                  }}
+                  title={t("labels.toggleMode")}
+                  aria-label={t("labels.toggleMode")}
+                  style={{
+                    fontFamily: Object.entries(FONT_FAMILY).find(
+                      ([key, value]) => value === 6,
+                    )?.[0],
+                  }}
+                >
+                  <div className="view-toggle-button__icon">
+                    {appState.insertModeEnabled
+                      ? InsertModeIcon
+                      : NormalModeIcon}
+                  </div>
+                  <span className="view-toggle-button__label">
+                    {appState.insertModeEnabled
+                      ? t("labels.insertMode")
+                      : t("labels.normalMode")}
                   </span>
                 </button>
               </Island>

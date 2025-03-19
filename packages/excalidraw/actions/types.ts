@@ -143,7 +143,9 @@ export type ActionName =
   | "exportToCsv"
   | "toggleView"
   | "toggleElementVisibility"
-  | "showAllElements";
+  | "showAllElements"
+  | "toggleMode"
+  | "toggleInsertMode";
 
 export type PanelComponentProps = {
   elements: readonly ExcalidrawElement[];

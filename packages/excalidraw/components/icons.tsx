@@ -638,8 +638,6 @@ export const shareIOS = createIcon(
   { width: 24, height: 24 },
 );
 
-
-
 export const shareWindows = createIcon(
   <>
     <path
@@ -2420,6 +2418,35 @@ export const EyeSlashIcon = createIcon(
       stroke="currentColor"
       strokeDasharray="4 2"
       fill="none"
+      strokeWidth="1"
+    />
+  </g>,
+  tablerIconProps,
+);
+
+export const InsertModeIcon = createIcon(
+  <g strokeWidth={1.25}>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    <path
+      d="M8 7h2v10H8V7zm6 0h2v10h-2V7zm-3-3h2v18h-2V4zm-8 5h2v8H3V9zm16 0h2v8h-2V9z"
+      fill="currentColor"
+      strokeWidth="1"
+    />
+  </g>,
+  tablerIconProps,
+);
+
+export const NormalModeIcon = createIcon(
+  <g strokeWidth={1.25}>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    <path
+      d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 16a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"
+      fill="currentColor"
+      strokeWidth="1"
+    />
+    <path
+      d="M12 7a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V8a1 1 0 0 0-1-1zm0 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"
+      fill="currentColor"
       strokeWidth="1"
     />
   </g>,

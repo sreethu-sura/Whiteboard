@@ -174,7 +174,17 @@
     "unCroppedDimension": "Uncropped dimension",
     "copyElementLink": "Copy link to object",
     "linkToElement": "Link to object",
-    "wrapSelectionInFrame": "Wrap selection in frame"
+    "wrapSelectionInFrame": "Wrap selection in frame",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "systemMode": "System mode",
+    "zenMode": "Zen mode",
+    "objectsSnapMode": "Snap to objects",
+    "exitZenMode": "Exit zen mode",
+    "toggleMode": "Toggle mode",
+    "insertMode": "Insert mode",
+    "normalMode": "Normal mode",
+    "cancel": "Cancel"
   },
   "elementLink": {
     "title": "Link to object",
@@ -224,6 +234,9 @@
     "zenMode": "Zen mode",
     "objectsSnapMode": "Snap to objects",
     "exitZenMode": "Exit zen mode",
+    "toggleMode": "Toggle mode",
+    "insertMode": "Insert mode",
+    "normalMode": "Normal mode",
     "cancel": "Cancel",
     "clear": "Clear",
     "remove": "Remove",
