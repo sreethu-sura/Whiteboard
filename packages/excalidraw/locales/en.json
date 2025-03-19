@@ -294,6 +294,7 @@
     "freedraw": "Draw",
     "text": "Text",
     "library": "Library",
+    "libraryAndSearch": "Library & Search",
     "lock": "Keep selected tool active after drawing",
     "penMode": "Pen mode - prevent touch",
     "link": "Add / Update link for a selected shape",

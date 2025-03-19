@@ -76,11 +76,31 @@ const viewToggleButtonStyles = `
 .view-toggle-button__button {
   display: flex;
   align-items: center;
-  background: transparent;
+  background: var(--color-surface-mid);
   border: none;
+  box-shadow: 0 0 0 1px var(--color-surface-lowest);
+  border-radius: var(--border-radius-lg);
   cursor: pointer;
   color: var(--text-primary-color);
-  padding: 0;
+  padding: 4px 8px;
+  width: 100%;
+  height: 100%;
+}
+
+.view-toggle-button__button:hover {
+  background: var(--color-surface-high);
+}
+
+.view-toggle-button__button:active {
+  box-shadow: 0 0 0 1px var(--color-brand-active);
+}
+
+.excalidraw.theme--dark .view-toggle-button__button {
+  background: var(--color-surface-high);
+}
+
+.excalidraw.theme--dark .view-toggle-button__button:hover {
+  background: #363541;
 }
 
 .view-toggle-button__icon {
@@ -389,13 +409,18 @@ const LayerUI = ({
               />
             )}
             {renderTopRightUI?.(device.editor.isMobile, appState)}
-            
+
             {/* Toggle View Button */}
-            <Tooltip
-              label={t("labels.toggleView")}
-              long={false}
-            >
-              <Island padding={2} className="view-toggle-button">
+            <Tooltip label={t("labels.toggleView")}>
+              <Island
+                className="view-toggle-button"
+                padding={0}
+                style={{
+                  background: "transparent",
+                  borderColor: "transparent",
+                  boxShadow: "none",
+                }}
+              >
                 <button
                   className="view-toggle-button__button"
                   onClick={() => {
@@ -403,19 +428,26 @@ const LayerUI = ({
                   }}
                   title={t("labels.toggleView")}
                   aria-label={t("labels.toggleView")}
-                  style={{         fontFamily: Object.entries(FONT_FAMILY).find(([key, value]) => value === 6)?.[0] 
+                  style={{
+                    fontFamily: Object.entries(FONT_FAMILY).find(
+                      ([key, value]) => value === 6,
+                    )?.[0],
                   }}
                 >
                   <div className="view-toggle-button__icon">
-                    {appState.currentView === "top" ? TopViewIcon : ElevationViewIcon}
+                    {appState.currentView === "top"
+                      ? TopViewIcon
+                      : ElevationViewIcon}
                   </div>
                   <span className="view-toggle-button__label">
-                    {appState.currentView === "top" ? t("labels.topView") : t("labels.elevationView")}
+                    {appState.currentView === "top"
+                      ? t("labels.topView")
+                      : t("labels.elevationView")}
                   </span>
                 </button>
               </Island>
             </Tooltip>
-            
+
             {!appState.viewModeEnabled &&
               appState.openDialog?.name !== "elementLinkSelector" &&
               // hide button when sidebar docked
@@ -468,7 +500,7 @@ const LayerUI = ({
       <DefaultSidebar.Trigger
         __fallback
         icon={LibraryIcon}
-        title={capitalizeString(t("toolBar.library"))}
+        title={capitalizeString(t("toolBar.libraryAndSearch"))}
         onToggle={(open) => {
           if (open) {
             trackEvent(
@@ -480,7 +512,7 @@ const LayerUI = ({
         }}
         tab={DEFAULT_SIDEBAR.defaultTab}
       >
-        {t("toolBar.library")}
+        {t("toolBar.libraryAndSearch")}
       </DefaultSidebar.Trigger>
       <DefaultOverwriteConfirmDialog />
       {appState.openDialog?.name === "ttd" && <TTDDialog __fallback />}
@@ -575,7 +607,7 @@ const LayerUI = ({
           }
         />
       )}
-      
+
       {!device.editor.isMobile && (
         <>
           <div

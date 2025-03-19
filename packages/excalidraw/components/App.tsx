@@ -10225,7 +10225,33 @@ class App extends React.Component<AppProps, AppState> {
           files: null,
         });
       } catch (error: any) {
-        this.setState({ errorMessage: error.message });
+        // Special handling for Tauri or desktop environments where drag-and-drop might fail
+        if (
+          error.name === "SyntaxError" &&
+          typeof navigator !== "undefined" &&
+          navigator.userAgent
+        ) {
+          // If the error is a syntax error (empty data), check if we're in Tauri
+          const isTauri =
+            navigator.userAgent.includes("Tauri") ||
+            (window as any).__TAURI__ !== undefined;
+
+          if (isTauri) {
+            // Fallback message for Tauri
+            this.setState({
+              toast: {
+                message:
+                  "Drag and drop failed. Try double-clicking library items instead.",
+                closable: true,
+                duration: 4000,
+              },
+            });
+          } else {
+            this.setState({ errorMessage: error.message });
+          }
+        } else {
+          this.setState({ errorMessage: error.message });
+        }
       }
       return;
     }

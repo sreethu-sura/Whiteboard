@@ -1,4 +1,10 @@
-import { ExportIcon, questionCircle, saveAs, PdfIcon, CsvIcon } from "../components/icons";
+import {
+  ExportIcon,
+  questionCircle,
+  saveAs,
+  PdfIcon,
+  CsvIcon,
+} from "../components/icons";
 import { ProjectName } from "../components/ProjectName";
 import { ToolButton } from "../components/ToolButton";
 import { Tooltip } from "../components/Tooltip";
@@ -310,7 +316,6 @@ export const actionExportWithDarkMode = register({
   ),
 });
 
-
 export const actionSaveToPdf = register({
   name: "saveToPdf",
   label: "Save to PDF",
@@ -327,7 +332,7 @@ export const actionSaveToPdf = register({
       // Trigger file download
       const fileName = `${app.getName()}.pdf`;
       const downloadFile = (blob: Blob, fileName: string) => {
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = fileName;
         link.click();
@@ -353,7 +358,6 @@ export const actionSaveToPdf = register({
     event.key === KEYS.P && event[KEYS.CTRL_OR_CMD] && !event.shiftKey, // Optional: Add a keyboard shortcut
 });
 
-
 export const actionExportToCsv = register({
   name: "exportToCsv",
   label: "Save to CSV",
@@ -370,7 +374,11 @@ export const actionExportToCsv = register({
       const parsedData = JSON.parse(jsonData); // Parse JSON for CSV conversion
 
       // Step 2: Generate CSV from JSON
-      const csvBlob = await exportToCsv(parsedData.elements, appState, app.files);
+      const csvBlob = await exportToCsv(
+        parsedData.elements,
+        appState,
+        app.files,
+      );
 
       // Step 3: Trigger file download
       const fileName = `${app.getName()}.csv`;

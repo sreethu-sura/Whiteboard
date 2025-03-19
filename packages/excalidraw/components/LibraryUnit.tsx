@@ -53,6 +53,17 @@ export const LibraryUnit = memo(
       <div className="library-unit__adder">{PlusIcon}</div>
     );
 
+    // Add double-click handler for Tauri
+    const handleDoubleClick = (event: React.MouseEvent) => {
+      if (id && elements) {
+        if (event.shiftKey) {
+          onToggle(id, event);
+        } else {
+          onClick(id);
+        }
+      }
+    };
+
     return (
       <div
         className={clsx("library-unit", {
@@ -63,6 +74,7 @@ export const LibraryUnit = memo(
         })}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onDoubleClick={handleDoubleClick}
       >
         <div
           className={clsx("library-unit__dragger", {
